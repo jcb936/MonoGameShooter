@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
-namespace MonoGameShooter
+namespace THClone
 {
     class Player
     {
@@ -19,6 +22,9 @@ namespace MonoGameShooter
         // Amount of hit points that player has
         public int Health;
 
+        // Speed of the player
+        public int Speed { get; private set; }
+
         public int Width
         { 
             get { return PlayerAnimation.FrameWidth; }
@@ -30,8 +36,37 @@ namespace MonoGameShooter
             get { return PlayerAnimation.FrameHeight; }
         }
 
-        public void Initialize(Animation animation, Vector2 position)
+        private Vector2 deltaPosition;
+
+        private Viewport viewport;
+
+        // laser
+        private List<Laser> laserBeams;
+
+        private Texture2D laserTexture;
+
+        //Our Laser Sound and Instance
+        private SoundEffect laserSound;
+        private SoundEffectInstance laserSoundInstance;
+
+        // govern how fast our laser can fire.
+        private TimeSpan laserSpawnTime;
+        private TimeSpan previousLaserSpawnTime;
+
+        private bool isShooting;
+
+        public void Initialize(Animation animation, Vector2 position, Viewport viewport, Texture2D laserTexture, SoundEffect laserSound)
         {
+            deltaPosition = new Vector2();
+
+            this.viewport = viewport;
+
+            this.laserTexture = laserTexture;
+
+            this.laserSound = laserSound;
+
+            laserSoundInstance = laserSound.CreateInstance();
+
             PlayerAnimation = animation;
 
             // Set the starting position of the player around the middle of the screen and to the back
@@ -42,18 +77,146 @@ namespace MonoGameShooter
 
             // Set the player health
             Health = 100;
+
+            // Set speed
+            Speed = 500;
+
+            // init our laser
+            laserBeams = new List<Laser>();
+            const float SECONDS_IN_MINUTE = 60f;
+            const float RATE_OF_FIRE = 800f;
+            laserSpawnTime = TimeSpan.FromSeconds(SECONDS_IN_MINUTE / RATE_OF_FIRE);
+            previousLaserSpawnTime = TimeSpan.Zero;
+
+            CommandManager.Instance.AddKeyboardBinding(Keys.W, MoveUp);
+            CommandManager.Instance.AddKeyboardBinding(Keys.A, MoveLeft);
+            CommandManager.Instance.AddKeyboardBinding(Keys.S, MoveDown);
+            CommandManager.Instance.AddKeyboardBinding(Keys.D, MoveRight);
+            CommandManager.Instance.AddKeyboardBinding(Keys.Space, Shoot);
         }
 
         public void Update(GameTime gameTime)
         {
+            deltaPosition *= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Position += deltaPosition;
+
+            // Make sure that the player does not go out of bounds
+            Position.X = MathHelper.Clamp(Position.X, Width / 2, viewport.Width - Width / 2);
+            Position.Y = MathHelper.Clamp(Position.Y, Height / 2, viewport.Height - Height / 2);
+
             PlayerAnimation.Position = Position;
             PlayerAnimation.Update(gameTime);
+
+            if (isShooting)
+                FireLaser(gameTime);
+            UpdateLaserBeams(gameTime);
+        }
+
+        private void UpdateLaserBeams(GameTime gameTime)
+        {
+            // Update the Projectiles
+            for (int i = laserBeams.Count - 1; i >= 0; i--)
+            {
+                laserBeams[i].Update(gameTime);
+
+                if (laserBeams[i].Active == false)
+                {
+                    laserBeams.RemoveAt(i);
+                }
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             PlayerAnimation.Draw(spriteBatch);
+
+            // Draw the lasers.
+            foreach (var l in laserBeams)
+            {
+                l.Draw(spriteBatch);
+            }
         }
+
+        protected void FireLaser(GameTime gameTime)
+        {
+            // govern the rate of fire for our lasers
+            if (gameTime.TotalGameTime - previousLaserSpawnTime > laserSpawnTime)
+            {
+                previousLaserSpawnTime = gameTime.TotalGameTime;
+                // Add the laer to our list.
+                AddLaser();
+
+                // Play the laser sound!
+                laserSoundInstance.Play();
+            }
+        }
+
+        protected void AddLaser()
+        {
+            Animation laserAnimation = new Animation();
+            // initlize the laser animation
+            laserAnimation.Initialize(laserTexture,
+                Position,
+                46,
+                16,
+                1,
+                30,
+                Color.White,
+                1f,
+                true);
+
+            Laser laser = new Laser();
+            // Get the starting postion of the laser.
+
+            var laserPostion = Position;
+            // Adjust the position slightly to match the muzzle of the cannon.
+            laserPostion.Y += 30;
+
+            // init the laser
+            laser.Initialize(laserAnimation, laserPostion);
+            laserBeams.Add(laser);
+            /* todo: add code to create a laser. */
+            // laserSoundInstance.Play();
+        }
+
+        #region Callbacks
+        private void MoveLeft(eButtonState buttonState, Vector2 amount)
+        {
+            if (buttonState == eButtonState.DOWN)
+                deltaPosition.X -= Speed;
+            else if (buttonState == eButtonState.UP)
+                deltaPosition.X = 0;
+        }
+        private void MoveRight(eButtonState buttonState, Vector2 amount)
+        {
+            if (buttonState == eButtonState.DOWN)
+                deltaPosition.X += Speed;
+            else if (buttonState == eButtonState.UP)
+                deltaPosition.X = 0;
+        }
+
+        private void MoveUp(eButtonState buttonState, Vector2 amount)
+        {
+            if (buttonState == eButtonState.DOWN)
+                deltaPosition.Y -= Speed;
+            else if (buttonState == eButtonState.UP)
+                deltaPosition.Y = 0;
+        }
+
+        private void MoveDown(eButtonState buttonState, Vector2 amount)
+        {
+            if (buttonState == eButtonState.DOWN)
+                deltaPosition.Y += Speed;
+            else if (buttonState == eButtonState.UP)
+                deltaPosition.Y = 0;
+        }
+
+        private void Shoot(eButtonState buttonState, Vector2 amount)
+        {
+            isShooting = buttonState == eButtonState.DOWN;
+        }
+
+        #endregion
 
     }
 }

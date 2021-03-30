@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGameShooter
+namespace THClone
 {
     /// <summary>
     /// The main class.

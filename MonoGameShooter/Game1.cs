@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
-namespace MonoGameShooter
+namespace THClone
 {
     /// <summary>
     /// This is the main type for your game.
@@ -23,21 +23,6 @@ namespace MonoGameShooter
 
         //HUD
         HUD hud;
-
-        // Keyboard states used to determine key presses
-        KeyboardState currentKeyboardState;
-        KeyboardState previousKeyboardState;
-
-        // Gamepad states used to determine button presses
-        GamePadState currentGamePadState;
-        GamePadState previousGamePadState;
-
-        //Mouse states used to track Mouse button press
-        MouseState currentMouseState;
-        MouseState previousMouseState;
-
-        // A movement speed for the player
-        float playerMoveSpeed;
 
         // Image used to display the static background
         Texture2D mainBackground;
@@ -81,9 +66,6 @@ namespace MonoGameShooter
         // Game Music.
         private Song gameMusic;
 
-        // The font used to display UI elements
-        SpriteFont font;
-
         //Number that holds the player score
         int score;
 
@@ -117,9 +99,6 @@ namespace MonoGameShooter
             bgLayer1 = new ParallaxingBackground();
             bgLayer2 = new ParallaxingBackground();
 
-            // Set a constant player move speed
-            playerMoveSpeed = 8.0f;
-
             // Initialize the enemies list
             enemies = new List<Enemy>();
 
@@ -145,6 +124,9 @@ namespace MonoGameShooter
             //Set player's score to zero
             score = 0;
 
+            //initialize basic binding to exit the game
+            CommandManager.Instance.AddKeyboardBinding(Keys.Escape, (buttonState, _) => { if (buttonState == eButtonState.DOWN) Exit(); });
+
             base.Initialize();
         }
 
@@ -164,8 +146,15 @@ namespace MonoGameShooter
             Texture2D playerTexture = Content.Load<Texture2D>("Graphics\\shipAnimation");
             playerAnimation.Initialize(playerTexture, Vector2.Zero, 115, 69, 8, 30, Color.White, 1f, true);
 
+            // load the texture to serve as the laser
+            laserTexture = Content.Load<Texture2D>("Graphics\\laser");
+
+            // Load the laserSound Effect and create the effect Instance
+            laserSound = Content.Load<SoundEffect>("Sound\\laserFire");
+            laserSoundInstance = laserSound.CreateInstance();
+
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
-            player.Initialize(playerAnimation, playerPosition);
+            player.Initialize(playerAnimation, playerPosition, GraphicsDevice.Viewport, laserTexture, laserSound);
 
             // Load the parallaxing background
             bgLayer1.Initialize(Content, "Graphics/bgLayer1", GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, -1);
@@ -174,19 +163,8 @@ namespace MonoGameShooter
 
             enemyTexture = Content.Load<Texture2D>("Graphics/mineAnimation");
 
-            // load the texture to serve as the laser
-            laserTexture = Content.Load<Texture2D>("Graphics\\laser");
-
-            // initialize HUD
-            var hudTexture = Content.Load<Texture2D>("Graphics\\t_blackSquare");
-            hud.Initialize(GraphicsDevice.Viewport.Height, GraphicsDevice.Viewport.Height, hudTexture);
-
             // load the explosion sheet
             explosionTexture = Content.Load<Texture2D>("Graphics\\explosion");
-
-            // Load the laserSound Effect and create the effect Instance
-            laserSound = Content.Load<SoundEffect>("Sound\\laserFire");
-            laserSoundInstance = laserSound.CreateInstance();
 
             // Load the laserSound Effect and create the effect Instance
             explosionSound = Content.Load<SoundEffect>("Sound\\explosion");
@@ -198,10 +176,11 @@ namespace MonoGameShooter
             MediaPlayer.Play(gameMusic);
 
             // Load the score font
-            font = Content.Load<SpriteFont>("Graphics\\gameFont");
+            var font = Content.Load<SpriteFont>("Graphics\\gameFont");
 
-            // Load the score font
-            font = Content.Load<SpriteFont>("Graphics\\gameFont");
+            // initialize HUD
+            var hudTexture = Content.Load<Texture2D>("Graphics\\t_blackSquare");
+            hud.Initialize(GraphicsDevice.Viewport, hudTexture, font);
 
         }
 
@@ -226,25 +205,17 @@ namespace MonoGameShooter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            CommandManager.Instance.Update();
+
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            //    Exit();
+
+            //// TODO: Add your update logic here
+            //// Allows the game to exit
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            //    this.Exit();
 
             // TODO: Add your update logic here
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-
-            // TODO: Add your update logic here
-
-            // Save the previous state of the keyboard, game pad, and mouse so we can determine single key/button presses
-            previousGamePadState = currentGamePadState;
-            previousKeyboardState = currentKeyboardState;
-            previousMouseState = currentMouseState;
-
-            // Read the current state of the keyboard, gamepad and mouse and store it
-            currentKeyboardState = Keyboard.GetState();
-            currentGamePadState = GamePad.GetState(PlayerIndex.One);
-            currentMouseState = Mouse.GetState();
 
             //Update the player
             UpdatePlayer(gameTime);
@@ -259,9 +230,6 @@ namespace MonoGameShooter
             // Update the collisions
             UpdateCollision();
 
-            // update laserbeams
-            UpdateLaserBeams(gameTime);
-
             // Update explosions
             UpdateExplosions(gameTime);
 
@@ -271,51 +239,6 @@ namespace MonoGameShooter
         private void UpdatePlayer(GameTime gameTime)
         {
             player.Update(gameTime);
-
-            //Get Mouse State then Capture the Button type and Respond Button Press
-            Vector2 mousePosition = new Vector2(currentMouseState.X, currentMouseState.Y);
-
-            if (currentMouseState.LeftButton == ButtonState.Pressed)
-            {
-                Vector2 posDelta = mousePosition - player.Position;
-                posDelta.Normalize();
-                posDelta = posDelta * playerMoveSpeed;
-                player.Position = player.Position + posDelta;
-            }
-
-            // Get Thumbstick Controls
-            player.Position.X += currentGamePadState.ThumbSticks.Left.X * playerMoveSpeed;
-            player.Position.Y -= currentGamePadState.ThumbSticks.Left.Y * playerMoveSpeed;
-
-            // Use the Keyboard / Dpad
-            if (currentKeyboardState.IsKeyDown(Keys.Left) || currentGamePadState.DPad.Left == ButtonState.Pressed)
-            {
-                player.Position.X -= playerMoveSpeed;
-            }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Right) || currentGamePadState.DPad.Right == ButtonState.Pressed)
-            {
-                player.Position.X += playerMoveSpeed;
-            }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Up) || currentGamePadState.DPad.Up == ButtonState.Pressed)
-            {
-                player.Position.Y -= playerMoveSpeed;
-            }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Down) || currentGamePadState.DPad.Down == ButtonState.Pressed)
-            {
-                player.Position.Y += playerMoveSpeed;
-            }
-
-            // Make sure that the player does not go out of bounds
-            player.Position.X = MathHelper.Clamp(player.Position.X, player.Width / 2, GraphicsDevice.Viewport.Width - player.Width / 2);
-            player.Position.Y = MathHelper.Clamp(player.Position.Y, player.Height / 2, GraphicsDevice.Viewport.Height - player.Height / 2);
-
-            if (currentKeyboardState.IsKeyDown(Keys.Space) || currentGamePadState.Buttons.X == ButtonState.Pressed)
-            {
-                FireLaser(gameTime);
-            }
 
             // reset score if player health goes to zero
             if (player.Health <= 0)
@@ -367,20 +290,6 @@ namespace MonoGameShooter
                     //Add to the player's score
                     score += enemies[i].Value;
                     enemies.RemoveAt(i);
-                }
-            }
-        }
-
-        private void UpdateLaserBeams(GameTime gameTime)
-        {
-            // Update the Projectiles
-            for (int i = laserBeams.Count - 1; i >= 0; i--)
-            {
-                laserBeams[i].Update(gameTime);
-
-                if (laserBeams[i].Active == false)
-                {
-                    laserBeams.RemoveAt(i);
                 }
             }
         }
@@ -449,48 +358,6 @@ namespace MonoGameShooter
             }
         }
 
-        protected void FireLaser(GameTime gameTime)
-        {
-            // govern the rate of fire for our lasers
-            if (gameTime.TotalGameTime - previousLaserSpawnTime > laserSpawnTime)
-            {
-                previousLaserSpawnTime = gameTime.TotalGameTime;
-                // Add the laer to our list.
-                AddLaser();
-
-                // Play the laser sound!
-                laserSoundInstance.Play();
-            }
-        }
-
-        protected void AddLaser()
-        {
-            Animation laserAnimation = new Animation();
-            // initlize the laser animation
-            laserAnimation.Initialize(laserTexture,
-                player.Position,
-                46,
-                16,
-                1,
-                30,
-                Color.White,
-                1f,
-                true);
-
-            Laser laser = new Laser();
-            // Get the starting postion of the laser.
-
-            var laserPostion = player.Position;
-            // Adjust the position slightly to match the muzzle of the cannon.
-            laserPostion.Y += 30;
-
-            // init the laser
-            laser.Initialize(laserAnimation, laserPostion);
-            laserBeams.Add(laser);
-            /* todo: add code to create a laser. */
-            // laserSoundInstance.Play();
-        }
-
         protected void AddExplosion(Vector2 enemyPosition)
         {
             Animation explosionAnimation = new Animation();
@@ -555,24 +422,11 @@ namespace MonoGameShooter
                 enemies[i].Draw(spriteBatch);
             }
 
-            // Draw the lasers.
-            foreach (var l in laserBeams)
-            {
-                l.Draw(spriteBatch);
-            }
-
             // draw explosions
             foreach (var e in explosions)
             {
                 e.Draw(spriteBatch);
             }
-
-            
-
-            // Draw the score
-            spriteBatch.DrawString(font, "score: " + score, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y), Color.White);
-            // Draw the player health
-            spriteBatch.DrawString(font, "health: " + player.Health, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + 30), Color.White);
 
             // Stop drawing
             spriteBatch.End();
