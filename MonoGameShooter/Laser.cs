@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
-    class Laser : ICollidable
+    class Laser : ICollidable, IEntity
     {
         // laser animation.
         public Animation LaserAnimation;
@@ -19,7 +19,7 @@ namespace THClone
         public int Damage = 10;
 
         // set the laser to active
-        public bool Active;
+        public bool Active { get; set; }
 
         // Laser beams range.
         int Range;
@@ -66,15 +66,21 @@ namespace THClone
         #region ICollidable interface
         public void OnCollision(ICollidable obj)
         {
+            if (!Active)
+                return;
+
             // we don't want to hit ourselves
             if (obj.GetType() == typeof(Player))
                 return;
 
             if (obj.GetType() == typeof(Enemy))
             {
-                // add explosion
-                FlaggedForRemoval = true;
-                Active = false;
+                if ((obj as Enemy).Active)
+                {
+                    // add explosion
+                    FlaggedForRemoval = true;
+                    Active = false;
+                }
             }
         }
         #endregion

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
-    class Enemy : ICollidable
+    class Enemy : ICollidable, IEntity
     {
         // Animation representing the enemy
         public Animation EnemyAnimation;
@@ -13,7 +13,7 @@ namespace THClone
         public Vector2 Position => position;
 
         // The state of the Enemy Ship
-        public bool Active;
+        public bool Active { get; set; }
 
         // The hit points of the enemy, if this goes to zero the enemy dies
         public int Health;
@@ -101,6 +101,23 @@ namespace THClone
 
         public void OnCollision(ICollidable obj)
         {
+            if (!Active)
+                return;
+
+            Type objType = obj.GetType();
+
+            if (objType == typeof(Laser) || objType == typeof(Player))
+            {
+                Explosion.Create(position);
+                Health = 0;
+
+                if (objType == typeof(Player))
+                {
+                    Player playerRef = obj as Player;
+                    playerRef.Health -= Damage;
+                }
+
+            }
 
         }
 

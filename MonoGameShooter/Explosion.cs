@@ -4,14 +4,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
-    class Explosion
+    class Explosion : IEntity
     {
         public static Texture2D ExplosionTexture { get; set; }
 
         Animation explosionAnimation;
         Vector2 Position;
-        public bool Active;
+        public bool Active { get; set; }
         int timeToLive;
+
         public int Width
         {
             get { return explosionAnimation.FrameWidth; }
@@ -38,6 +39,7 @@ namespace THClone
 
             Explosion explosion = new Explosion();
             explosion.Initialize(explosionAnimation, position);
+            EntityManager.Instance.AddEntity(explosion);
 
             return explosion;
         }

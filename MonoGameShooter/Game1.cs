@@ -156,6 +156,8 @@ namespace THClone
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
             player.Initialize(playerAnimation, playerPosition, GraphicsDevice.Viewport, laserTexture, laserSound);
 
+            EntityManager.Instance.AddEntity(player);
+
             // Load the parallaxing background
             bgLayer1.Initialize(Content, "Graphics/bgLayer1", GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, -1);
             bgLayer2.Initialize(Content, "Graphics/bgLayer2", GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, -2);
@@ -165,6 +167,7 @@ namespace THClone
 
             // load the explosion sheet
             explosionTexture = Content.Load<Texture2D>("Graphics\\explosion");
+            Explosion.ExplosionTexture = explosionTexture;
 
             // Load the laserSound Effect and create the effect Instance
             explosionSound = Content.Load<SoundEffect>("Sound\\explosion");
@@ -205,13 +208,10 @@ namespace THClone
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            EntityManager.Instance.Update(gameTime);
+
             CommandManager.Instance.Update();
             CollisionManager.Instance.Update();
-
-
-
-            //Update the player
-            UpdatePlayer(gameTime);
 
             // Update the parallaxing background
             bgLayer1.Update(gameTime);
@@ -220,18 +220,12 @@ namespace THClone
             // Update the enemies
             UpdateEnemies(gameTime);
 
-            // Update the collisions
-            UpdateCollision();
-
-            // Update explosions
-            UpdateExplosions(gameTime);
-
             base.Update(gameTime);
         }
 
         private void UpdatePlayer(GameTime gameTime)
         {
-            player.Update(gameTime);
+            //player.Update(gameTime);
 
             // reset score if player health goes to zero
             if (player.Health <= 0)
@@ -259,7 +253,7 @@ namespace THClone
             enemy.Initialize(enemyAnimation, position);
 
             // Add the enemy to the active enemies list
-            enemies.Add(enemy);
+            EntityManager.Instance.AddEntity(enemy);
             CollisionManager.Instance.AddCollidable(enemy);
         }
 
@@ -272,117 +266,6 @@ namespace THClone
 
                 // Add an Enemy
                 AddEnemy();
-            }
-
-            // Update the Enemies
-            for (int i = enemies.Count - 1; i >= 0; i--)
-            {
-                enemies[i].Update(gameTime);
-
-                if (enemies[i].Active == false)
-                {
-                    //Add to the player's score
-                    score += enemies[i].Value;
-                    enemies.RemoveAt(i);
-                }
-            }
-        }
-
-        private void UpdateCollision()
-        {
-            // Use the Rectangle's built-in intersect function to
-            // determine if two objects are overlapping
-            Rectangle playerRectangle;
-            Rectangle enemyRectangle;
-            Rectangle laserRectangle;
-
-            // Only create the rectangle once for the player
-            playerRectangle = new Rectangle((int)player.Position.X,
-            (int)player.Position.Y,
-            player.Width,
-            player.Height);
-
-            // Do the collision between the player and the enemies
-            for (int i = 0; i < enemies.Count; i++)
-            {
-                enemyRectangle = new Rectangle((int)enemies[i].Position.X,
-                (int)enemies[i].Position.Y,
-                enemies[i].Width,
-                enemies[i].Height);
-
-                if (playerRectangle.Intersects(enemyRectangle))
-                {
-                    // kill off the enemy
-                    enemies[i].Health = 0;
-                    // Show the explosion where the enemy was...
-                    AddExplosion(enemies[i].Position);
-                    // deal damge to the player
-                    player.Health -= enemies[i].Damage;
-
-                    // if the player has no health destroy it.
-                    if (player.Health <= 0)
-                    {
-                        player.Active = false;
-
-                    }
-                }
-
-                // Laserbeam vs Enemy Collision
-                for (var l = 0; l < laserBeams.Count; l++)
-                {
-                    // create a rectangle for this laserbeam
-                    laserRectangle = new Rectangle(
-                        (int)laserBeams[l].Position.X,
-                        (int)laserBeams[l].Position.Y,
-                        laserBeams[l].Width,
-                        laserBeams[l].Height);
-
-                    // test the bounds of the laser and enemy
-                    if (laserRectangle.Intersects(enemyRectangle))
-                    {
-                        // Show the explosion where the enemy was...
-                        AddExplosion(enemies[i].Position);
-                        // kill off the enemy
-                        enemies[i].Health = 0;
-
-                        // kill off the laserbeam
-                        laserBeams[l].Active = false;
-                    }
-                }
-            }
-        }
-
-        protected void AddExplosion(Vector2 enemyPosition)
-        {
-            Animation explosionAnimation = new Animation();
-
-            explosionAnimation.Initialize(explosionTexture,
-                enemyPosition,
-                134,
-                134,
-                12,
-                30,
-                Color.White,
-                1.0f,
-                true);
-
-            Explosion explosion = new Explosion();
-            explosion.Initialize(explosionAnimation, enemyPosition);
-
-            explosions.Add(explosion);
-
-            /* play the explosion sound. */
-            explosionSound.Play();
-        }
-
-        private void UpdateExplosions(GameTime gameTime)
-        {
-            for (var e = explosions.Count - 1; e >= 0; e--)
-            {
-                explosions[e].Update(gameTime);
-
-                if (!explosions[e].Active)
-                    explosions.Remove(explosions[e]);
             }
         }
 
@@ -405,22 +288,9 @@ namespace THClone
             bgLayer1.Draw(spriteBatch);
             bgLayer2.Draw(spriteBatch);
 
+            EntityManager.Instance.DrawEntities(spriteBatch);
+
             hud.Draw(spriteBatch);
-
-            // Draw the Player
-            player.Draw(spriteBatch);
-
-            // Draw the Enemies
-            for (int i = 0; i < enemies.Count; i++)
-            {
-                enemies[i].Draw(spriteBatch);
-            }
-
-            // draw explosions
-            foreach (var e in explosions)
-            {
-                e.Draw(spriteBatch);
-            }
 
             // Stop drawing
             spriteBatch.End();

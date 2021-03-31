@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace THClone
 {
-    class Player : ICollidable
+    class Player : ICollidable, IEntity
     {
         // Animation representing the player
         //public Texture2D PlayerTexture;
@@ -17,7 +17,7 @@ namespace THClone
         public Vector2 Position => position;
 
         // State of the player
-        public bool Active;
+        public bool Active { get; set; }
 
         // Amount of hit points that player has
         public int Health;
@@ -120,32 +120,11 @@ namespace THClone
 
             if (isShooting)
                 FireLaser(gameTime);
-            UpdateLaserBeams(gameTime);
-        }
-
-        private void UpdateLaserBeams(GameTime gameTime)
-        {
-            // Update the Projectiles
-            for (int i = laserBeams.Count - 1; i >= 0; i--)
-            {
-                laserBeams[i].Update(gameTime);
-
-                if (laserBeams[i].FlaggedForRemoval)
-                {
-                    laserBeams.RemoveAt(i);
-                }
-            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             PlayerAnimation.Draw(spriteBatch);
-
-            // Draw the lasers.
-            foreach (var l in laserBeams)
-            {
-                l.Draw(spriteBatch);
-            }
         }
 
         protected void FireLaser(GameTime gameTime)
@@ -186,6 +165,8 @@ namespace THClone
             // init the laser
             laser.Initialize(laserAnimation, laserPostion);
             laserBeams.Add(laser);
+
+            EntityManager.Instance.AddEntity(laser);
             CollisionManager.Instance.AddCollidable(laser);
 
             /* todo: add code to create a laser. */
