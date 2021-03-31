@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
-    class Laser
+    class Laser : ICollidable
     {
         // laser animation.
         public Animation LaserAnimation;
@@ -13,7 +13,7 @@ namespace THClone
         float laserMoveSpeed = 30f;
 
         // position of the laser
-        public Vector2 Position;
+        public Vector2 Position => position;
 
         // The damage the laser deals.
         public int Damage = 10;
@@ -36,16 +36,24 @@ namespace THClone
             get { return LaserAnimation.FrameHeight; }
         }
 
+        // ICollidable interface
+        public float BoundingRadius { get; private set; }
+
+        public bool FlaggedForRemoval { get; private set; }
+
+        private Vector2 position;
+
         public void Initialize(Animation animation, Vector2 position)
         {
             LaserAnimation = animation;
-            Position = position;
+            this.position = position;
+            BoundingRadius = animation.FrameWidth / 2f;
             Active = true;
         }
 
         public void Update(GameTime gameTime)
         {
-            Position.Y -= laserMoveSpeed;
+            position.Y -= laserMoveSpeed;
             LaserAnimation.Position = Position;
             LaserAnimation.Update(gameTime);
         }
@@ -54,5 +62,21 @@ namespace THClone
         {
             LaserAnimation.Draw(spriteBatch);
         }
+
+        #region ICollidable interface
+        public void OnCollision(ICollidable obj)
+        {
+            // we don't want to hit ourselves
+            if (obj.GetType() == typeof(Player))
+                return;
+
+            if (obj.GetType() == typeof(Enemy))
+            {
+                // add explosion
+                FlaggedForRemoval = true;
+                Active = false;
+            }
+        }
+        #endregion
     }
 }

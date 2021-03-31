@@ -4,13 +4,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
-    class Enemy
+    class Enemy : ICollidable
     {
         // Animation representing the enemy
         public Animation EnemyAnimation;
 
         // The position of the enemy ship relative to the top left corner of thescreen
-        public Vector2 Position;
+        public Vector2 Position => position;
 
         // The state of the Enemy Ship
         public bool Active;
@@ -36,6 +36,14 @@ namespace THClone
             get { return EnemyAnimation.FrameHeight; }
         }
 
+        #region ICollidable interface
+        public float BoundingRadius { get; private set; }
+
+        public bool FlaggedForRemoval { get; private set; }
+        #endregion
+
+        private Vector2 position;
+
         // The speed at which the enemy moves
         float enemyMoveSpeed;
 
@@ -45,7 +53,7 @@ namespace THClone
             EnemyAnimation = animation;
 
             // Set the position of the enemy
-            Position = position;
+            this.position = position;
 
             // We initialize the enemy to be active so it will be update in the game
             Active = true;
@@ -61,12 +69,14 @@ namespace THClone
 
             // Set the score value of the enemy
             Value = 100;
+
+            BoundingRadius = animation.FrameWidth / 2f;
         }
 
         public void Update(GameTime gameTime)
         {
             // The enemy always moves to the left so decrement it's x position
-            Position.X -= enemyMoveSpeed;
+            position.X -= enemyMoveSpeed;
 
             // Update the position of the Animation
             EnemyAnimation.Position = Position;
@@ -88,5 +98,11 @@ namespace THClone
             // Draw the animation
             EnemyAnimation.Draw(spriteBatch);
         }
+
+        public void OnCollision(ICollidable obj)
+        {
+
+        }
+
     }
 }

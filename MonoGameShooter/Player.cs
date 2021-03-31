@@ -7,14 +7,14 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace THClone
 {
-    class Player
+    class Player : ICollidable
     {
         // Animation representing the player
         //public Texture2D PlayerTexture;
         public Animation PlayerAnimation;
 
         // Position of the Player relative to the upper left side of the screen
-        public Vector2 Position;
+        public Vector2 Position => position;
 
         // State of the player
         public bool Active;
@@ -35,6 +35,13 @@ namespace THClone
         {
             get { return PlayerAnimation.FrameHeight; }
         }
+
+        // ICollidable interface
+        public float BoundingRadius { get; private set; }
+
+        public bool FlaggedForRemoval { get; private set; }
+
+        private Vector2 position;
 
         private Vector2 deltaPosition;
 
@@ -65,12 +72,16 @@ namespace THClone
 
             this.laserSound = laserSound;
 
+            FlaggedForRemoval = false;
+
+            BoundingRadius = 0f;
+
             laserSoundInstance = laserSound.CreateInstance();
 
             PlayerAnimation = animation;
 
             // Set the starting position of the player around the middle of the screen and to the back
-            Position = position;
+            this.position = position;
 
             // Set the player to be active
             Active = true;
@@ -98,11 +109,11 @@ namespace THClone
         public void Update(GameTime gameTime)
         {
             deltaPosition *= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Position += deltaPosition;
+            position += deltaPosition;
 
             // Make sure that the player does not go out of bounds
-            Position.X = MathHelper.Clamp(Position.X, Width / 2, viewport.Width - Width / 2);
-            Position.Y = MathHelper.Clamp(Position.Y, Height / 2, viewport.Height - Height / 2);
+            position.X = MathHelper.Clamp(Position.X, Width / 2, viewport.Width - Width / 2);
+            position.Y = MathHelper.Clamp(Position.Y, Height / 2, viewport.Height - Height / 2);
 
             PlayerAnimation.Position = Position;
             PlayerAnimation.Update(gameTime);
@@ -119,7 +130,7 @@ namespace THClone
             {
                 laserBeams[i].Update(gameTime);
 
-                if (laserBeams[i].Active == false)
+                if (laserBeams[i].FlaggedForRemoval)
                 {
                     laserBeams.RemoveAt(i);
                 }
@@ -175,9 +186,18 @@ namespace THClone
             // init the laser
             laser.Initialize(laserAnimation, laserPostion);
             laserBeams.Add(laser);
+            CollisionManager.Instance.AddCollidable(laser);
+
             /* todo: add code to create a laser. */
             // laserSoundInstance.Play();
         }
+
+        #region ICollidable interface
+        public void OnCollision(ICollidable obj)
+        {
+            // do stuff
+        }
+        #endregion
 
         #region Callbacks
         private void MoveLeft(eButtonState buttonState, Vector2 amount)

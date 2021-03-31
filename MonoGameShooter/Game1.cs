@@ -206,6 +206,7 @@ namespace THClone
         protected override void Update(GameTime gameTime)
         {
             CommandManager.Instance.Update();
+            CollisionManager.Instance.Update();
 
             //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             //    Exit();
@@ -267,6 +268,7 @@ namespace THClone
 
             // Add the enemy to the active enemies list
             enemies.Add(enemy);
+            CollisionManager.Instance.AddCollidable(enemy);
         }
 
         private void UpdateEnemies(GameTime gameTime)
