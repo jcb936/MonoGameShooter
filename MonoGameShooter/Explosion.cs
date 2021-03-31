@@ -6,6 +6,8 @@ namespace THClone
 {
     class Explosion
     {
+        public static Texture2D ExplosionTexture { get; set; }
+
         Animation explosionAnimation;
         Vector2 Position;
         public bool Active;
@@ -17,6 +19,27 @@ namespace THClone
         public int Height
         {
             get { return explosionAnimation.FrameWidth; }
+        }
+
+        // Factory method
+        public static Explosion Create(Vector2 position)
+        {
+            Animation explosionAnimation = new Animation();
+
+            explosionAnimation.Initialize(ExplosionTexture,
+                position,
+                134,
+                134,
+                12,
+                30,
+                Color.White,
+                1.0f,
+                true);
+
+            Explosion explosion = new Explosion();
+            explosion.Initialize(explosionAnimation, position);
+
+            return explosion;
         }
 
         public void Initialize(Animation animation, Vector2 position)

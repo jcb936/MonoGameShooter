@@ -208,15 +208,7 @@ namespace THClone
             CommandManager.Instance.Update();
             CollisionManager.Instance.Update();
 
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //    Exit();
 
-            //// TODO: Add your update logic here
-            //// Allows the game to exit
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-            //    this.Exit();
-
-            // TODO: Add your update logic here
 
             //Update the player
             UpdatePlayer(gameTime);
