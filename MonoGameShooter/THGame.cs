@@ -13,7 +13,7 @@ namespace THClone
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class THGame : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -66,11 +66,13 @@ namespace THClone
         // Game Music.
         private Song gameMusic;
 
+        //private FSM gameLoopFSM;
+
         //Number that holds the player score
         int score;
 
 
-        public Game1()
+        public THGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -85,6 +87,8 @@ namespace THClone
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            //gameLoopFSM = new(this);
 
             graphics.PreferredBackBufferHeight = 1920;
             graphics.PreferredBackBufferWidth = 1080;
@@ -208,17 +212,17 @@ namespace THClone
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            EntityManager.Instance.Update(gameTime);
+            //EntityManager.Instance.Update(gameTime);
 
-            CommandManager.Instance.Update();
-            CollisionManager.Instance.Update();
+            //CommandManager.Instance.Update();
+            //CollisionManager.Instance.Update();
 
-            // Update the parallaxing background
-            bgLayer1.Update(gameTime);
-            bgLayer2.Update(gameTime);
+            //// Update the parallaxing background
+            //bgLayer1.Update(gameTime);
+            //bgLayer2.Update(gameTime);
 
-            // Update the enemies
-            UpdateEnemies(gameTime);
+            //// Update the enemies
+            //UpdateEnemies(gameTime);
 
             base.Update(gameTime);
         }
