@@ -119,6 +119,7 @@ namespace THClone
 
             // set transitions
             mainMenuState.AddTransition(new Transition(gameState, () => mainMenuState.StartGame));
+            gameState.AddTransition(new Transition(mainMenuState, () => gameState.GameOver));
 
             mainLoop.AddState(mainMenuState);
             mainLoop.AddState(gameState);
@@ -153,18 +154,6 @@ namespace THClone
             mainLoop.Update(gameTime);
 
             base.Update(gameTime);
-        }
-
-        private void UpdatePlayer(GameTime gameTime)
-        {
-            //player.Update(gameTime);
-
-            // reset score if player health goes to zero
-            //if (player.Health <= 0)
-            //{
-            //    player.Health = 100;
-            //    score = 0;
-            //}
         }
 
         /// <summary>

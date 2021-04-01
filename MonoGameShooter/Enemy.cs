@@ -110,11 +110,12 @@ namespace THClone
             {
                 Explosion.Create(position);
                 Health = 0;
+                GameInfo.CurrentScore += Value;
 
                 if (objType == typeof(Player))
                 {
                     Player playerRef = obj as Player;
-                    playerRef.Health -= Damage;
+                    GameInfo.Health -= Damage;
                 }
 
             }

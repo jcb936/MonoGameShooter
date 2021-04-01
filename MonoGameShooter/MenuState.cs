@@ -87,12 +87,15 @@ namespace THClone
                 var rect = new Rectangle(0, 0, viewport.Width, viewport.Height);
                 spriteBatch.Draw(backgroundImage, rect, Color.White);
                 spriteBatch.DrawString(font, ">", new Vector2(viewport.TitleSafeArea.Width - 320, (viewport.TitleSafeArea.Height / 2f - 20) + currentPointerYOffset), Color.White);
+                DrawHighscore(spriteBatch);
             }
         }
 
         public void DrawHighscore(SpriteBatch spriteBatch)
         {
-
+            Leaderboard leaderboard = GameInfo.GetHighscores();
+            spriteBatch.DrawString(font, "HighScore", new Vector2(50, viewport.TitleSafeArea.Height / 2f + 100), Color.White);
+            spriteBatch.DrawString(font, leaderboard.Entry.Name + ": " + leaderboard.Entry.Score, new Vector2(50, viewport.TitleSafeArea.Height / 2f + 150), Color.White);
         }
 
         private void SetPointerLocation()

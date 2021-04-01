@@ -62,6 +62,8 @@ namespace THClone
 
         private bool isShooting;
 
+        public event Action PlayerDestroyed;
+
         public void Initialize(Animation animation, Vector2 position, Viewport viewport, Texture2D laserTexture, SoundEffect laserSound)
         {
             deltaPosition = new Vector2();
@@ -74,7 +76,7 @@ namespace THClone
 
             FlaggedForRemoval = false;
 
-            BoundingRadius = 0f;
+            BoundingRadius = animation.FrameWidth / 2f;
 
             laserSoundInstance = laserSound.CreateInstance();
 
@@ -89,7 +91,7 @@ namespace THClone
             Active = true;
 
             // Set the player health
-            Health = 100;
+            GameInfo.Health = 100;
 
             // Set speed
             Speed = 500;
@@ -116,6 +118,14 @@ namespace THClone
 
             if (isShooting)
                 FireLaser(gameTime);
+
+            // reset score if player health goes to zero
+            if (GameInfo.Health <= 0)
+            {
+                Active = false;
+                PlayerDestroyed?.Invoke();
+                FlaggedForRemoval = true;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

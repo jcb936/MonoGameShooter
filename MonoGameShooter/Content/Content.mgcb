@@ -176,6 +176,9 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/Untitled.png;Graphics/t_mainMenu.png
 
+#begin leaderboard.xml
+/copy:leaderboard.xml
+
 #begin Sound/explosion.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

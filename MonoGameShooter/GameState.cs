@@ -31,6 +31,8 @@ namespace THClone
         private TimeSpan enemySpawnTime;
         private TimeSpan previousSpawnTime;
 
+        public bool GameOver { get; private set; }
+
         public GameState()
         {
 
@@ -59,10 +61,14 @@ namespace THClone
         }
 
         public override void Enter(object owner)
-        { 
+        {
+            GameInfo.CurrentScore = 0;
             player.SetBindings();
             CommandManager.Instance.AddKeyboardBinding(Keys.Escape, (_,_) => GameInfo.ExitGame());
             EntityManager.Instance.AddEntity(player);
+            CollisionManager.Instance.AddCollidable(player);
+
+            player.PlayerDestroyed += GameOverSequence;
         }
 
         public override void Execute(object owner, GameTime gameTime)
@@ -79,6 +85,8 @@ namespace THClone
         {
             player.RemoveBindings();
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
+
+            player.PlayerDestroyed -= GameOverSequence;
         }
 
         public override void Draw(object owner, SpriteBatch spriteBatch)
@@ -127,6 +135,11 @@ namespace THClone
                 // Add an Enemy
                 AddEnemy();
             }
+        }
+
+        private void GameOverSequence()
+        {
+            GameOver = true;
         }
     }
 }
