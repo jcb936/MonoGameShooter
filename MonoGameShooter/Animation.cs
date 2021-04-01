@@ -49,6 +49,8 @@ namespace THClone
         // Width of a given frame
         public Vector2 Position;
 
+        public float Rotation;
+
         public void Initialize(Texture2D texture, Vector2 position, int frameWidth, int frameHeight, int frameCount, int frametime, Color color, float scale, bool looping)
         {
             // Keep a local copy of the values passed in
@@ -59,6 +61,7 @@ namespace THClone
             this.frameTime = frametime;
             this.scale = scale;
 
+            Rotation = 0f;
             Looping = looping;
             Position = position;
             spriteStrip = texture;
@@ -113,7 +116,8 @@ namespace THClone
             // Only draw the animation when we are active
             if (Active)
             {
-                spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color);
+                //spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color);
+                spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color, Rotation, new Vector2(FrameWidth / 2f, FrameHeight / 2f), SpriteEffects.None, 0);
             }
         }
     }

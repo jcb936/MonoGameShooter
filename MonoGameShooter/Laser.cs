@@ -49,6 +49,7 @@ namespace THClone
             this.position = position;
             BoundingRadius = animation.FrameWidth / 2f;
             Active = true;
+            LaserAnimation.Rotation = MathHelper.ToRadians(90f);
         }
 
         public void Update(GameTime gameTime)

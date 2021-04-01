@@ -80,6 +80,8 @@ namespace THClone
 
             PlayerAnimation = animation;
 
+            PlayerAnimation.Rotation = MathHelper.ToRadians(-90f);
+
             // Set the starting position of the player around the middle of the screen and to the back
             this.position = position;
 
@@ -154,7 +156,8 @@ namespace THClone
 
             var laserPostion = Position;
             // Adjust the position slightly to match the muzzle of the cannon.
-            laserPostion.Y += 30;
+            laserPostion.Y -= 60;
+            laserPostion.X -= 25;
 
             // init the laser
             laser.Initialize(laserAnimation, laserPostion);
