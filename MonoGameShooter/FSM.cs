@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
@@ -61,6 +62,11 @@ namespace THClone
 
             // Execute the current state
             m_CurrentState.Execute(m_Owner, gameTime);
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            m_CurrentState.Draw(m_Owner, spriteBatch);
         }
     }
 

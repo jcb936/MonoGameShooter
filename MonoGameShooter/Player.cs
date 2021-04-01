@@ -98,12 +98,6 @@ namespace THClone
             const float RATE_OF_FIRE = 800f;
             laserSpawnTime = TimeSpan.FromSeconds(SECONDS_IN_MINUTE / RATE_OF_FIRE);
             previousLaserSpawnTime = TimeSpan.Zero;
-
-            CommandManager.Instance.AddKeyboardBinding(Keys.W, MoveUp);
-            CommandManager.Instance.AddKeyboardBinding(Keys.A, MoveLeft);
-            CommandManager.Instance.AddKeyboardBinding(Keys.S, MoveDown);
-            CommandManager.Instance.AddKeyboardBinding(Keys.D, MoveRight);
-            CommandManager.Instance.AddKeyboardBinding(Keys.Space, Shoot);
         }
 
         public void Update(GameTime gameTime)
@@ -171,6 +165,24 @@ namespace THClone
 
             /* todo: add code to create a laser. */
             // laserSoundInstance.Play();
+        }
+
+        public void SetBindings()
+        {
+            CommandManager.Instance.AddKeyboardBinding(Keys.W, MoveUp);
+            CommandManager.Instance.AddKeyboardBinding(Keys.A, MoveLeft);
+            CommandManager.Instance.AddKeyboardBinding(Keys.S, MoveDown);
+            CommandManager.Instance.AddKeyboardBinding(Keys.D, MoveRight);
+            CommandManager.Instance.AddKeyboardBinding(Keys.Space, Shoot);
+        }
+
+        public void RemoveBindings()
+        {
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.W);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.A);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.S);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.D);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Space);
         }
 
         #region ICollidable interface

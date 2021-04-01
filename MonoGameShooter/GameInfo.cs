@@ -36,5 +36,12 @@ namespace THClone
         public static event Action<int> ScoreUpdated;
 
         public static event Action<int> HealthUpdated;
+
+        public static THGame GameInstance;
+
+        public static void ExitGame()
+        {
+            GameInstance.Exit();
+        }
     }
 }

@@ -50,42 +50,22 @@ namespace THClone
 
         public void OnKeyDown(object sender, KeyboardEventArgs e)
         {
-            GameAction action = m_KeyBindings[e.Key];
-
-            if (action != null)
-            {
-                action(eButtonState.DOWN, new Vector2(1.0f));
-            }
+            m_KeyBindings[e.Key]?.Invoke(eButtonState.DOWN, new Vector2(1.0f));
         }
 
         public void OnKeyUp(object sender, KeyboardEventArgs e)
         {
-            GameAction action = m_KeyBindings[e.Key];
-
-            if (action != null)
-            {
-                action(eButtonState.UP, new Vector2(1.0f));
-            }
+            m_KeyBindings[e.Key]?.Invoke(eButtonState.UP, new Vector2(1.0f));
         }
 
         public void OnKeyPressed(object sender, KeyboardEventArgs e)
         {
-            GameAction action = m_KeyBindings[e.Key];
-
-            if (action != null)
-            {
-                action(eButtonState.PRESSED, new Vector2(1.0f));
-            }
+            m_KeyBindings[e.Key]?.Invoke(eButtonState.PRESSED, new Vector2(1.0f));
         }
 
         public void OnMouseButtonDown(object sender, MouseEventArgs e)
         {
-            GameAction action = m_MouseButtonBindings[e.Button];
-
-            if (action != null)
-            {
-                action(eButtonState.DOWN, new Vector2(e.CurrentState.X, e.CurrentState.Y));
-            }
+            m_MouseButtonBindings[e.Button]?.Invoke(eButtonState.DOWN, new Vector2(e.CurrentState.X, e.CurrentState.Y));
         }
 
         public void AddKeyboardBinding(Keys key, GameAction action)
@@ -94,7 +74,13 @@ namespace THClone
             m_Input.AddKey(key);
 
             // Add the binding to the command map
-            m_KeyBindings.Add(key, action);
+            m_KeyBindings[key] = action;
+        }
+
+        public void RemoveKeyboardBinding(Keys key)
+        {
+            // Add the binding to the command map
+            m_KeyBindings[key] = null;
         }
 
         public void AddMouseBinding(MouseButton button, GameAction action)

@@ -164,6 +164,18 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/t_blackSquare.jpg
 
+#begin Graphics/Untitled.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Graphics/Untitled.png;Graphics/t_mainMenu.png
+
 #begin Sound/explosion.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

@@ -37,7 +37,7 @@ namespace THClone
 
         private Selection currentSelection;
 
-        private float currentPointerYLocation;
+        private float currentPointerYOffset;
 
         private Action exitGame;
 
@@ -55,7 +55,7 @@ namespace THClone
         {
             currentSelection = Selection.START;
             currentScreen = Screen.MAIN;
-            currentPointerYLocation = viewport.TitleSafeArea.Width / 2f;
+            currentPointerYOffset = 0f;
             StartGame = false;
             if (owner.GetType() == typeof(Game))
                 exitGame = () => (owner as Game).Exit();
@@ -64,18 +64,18 @@ namespace THClone
             CommandManager.Instance.AddKeyboardBinding(Keys.Up, CycleUp);
             CommandManager.Instance.AddKeyboardBinding(Keys.Enter, SelectOption);
             CommandManager.Instance.AddKeyboardBinding(Keys.Escape, GoBack);
-
-            throw new NotImplementedException();
         }
 
         public override void Execute(object owner, GameTime gameTime)
         {
-            throw new NotImplementedException();
         }
 
         public override void Exit(object owner)
         {
-            throw new NotImplementedException();
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Down);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Up);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Enter);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
         }
 
         public override void Draw(object owner, SpriteBatch spriteBatch)
@@ -84,7 +84,9 @@ namespace THClone
                 DrawHighscore(spriteBatch);
             else
             {
-                spriteBatch.DrawString(font, ">", new Vector2(viewport.TitleSafeArea.Width - 100, viewport.TitleSafeArea.Height / 2f), Color.White);
+                var rect = new Rectangle(0, 0, viewport.Width, viewport.Height);
+                spriteBatch.Draw(backgroundImage, rect, Color.White);
+                spriteBatch.DrawString(font, ">", new Vector2(viewport.TitleSafeArea.Width - 320, (viewport.TitleSafeArea.Height / 2f - 20) + currentPointerYOffset), Color.White);
             }
         }
 
@@ -93,32 +95,64 @@ namespace THClone
 
         }
 
+        private void SetPointerLocation()
+        {
+            switch (currentSelection)
+            {
+                case Selection.START:
+                    currentPointerYOffset = -80f;
+                    break;
+                case Selection.HIGH_SCORE:
+                    currentPointerYOffset = 0;
+                    break;
+                case Selection.QUIT:
+                    currentPointerYOffset = 80f;
+                    break;
+            }
+        }
+
         #region Callbacks
         private void CycleDown(eButtonState buttonState, Vector2 intensity)
         {
-            currentSelection = (Selection)(((int)currentSelection + 1) % 3);
+            if (buttonState == eButtonState.PRESSED)
+            {
+                currentSelection = (Selection)(((int)currentSelection + 1) % 3);
+
+                SetPointerLocation();
+            }
         }
 
         private void CycleUp(eButtonState buttonState, Vector2 intensity)
         {
-            int selectionInt = (int)currentSelection;
-            selectionInt = (selectionInt - 1) >= 0 ? selectionInt - 1 : 3;
-            currentSelection = (Selection)selectionInt;
+            if (buttonState == eButtonState.PRESSED)
+            {
+                int selectionInt = (int)currentSelection;
+                selectionInt = (selectionInt - 1) >= 0 ? selectionInt - 1 : 3;
+                currentSelection = (Selection)selectionInt;
+
+                SetPointerLocation();
+
+            }
         }
 
         private void SelectOption(eButtonState buttonState, Vector2 intensity)
         {
-            switch (currentSelection)
+            if (buttonState == eButtonState.PRESSED)
             {
-                case Selection.QUIT:
-                    exitGame.Invoke();
-                    break;
-                case Selection.HIGH_SCORE:
-                    break;
-                case Selection.START:
-                    StartGame = true;
-                    break;
+                switch (currentSelection)
+                {
+                    case Selection.QUIT:
+                        GameInfo.ExitGame();
+                        break;
+                    case Selection.HIGH_SCORE:
+                        break;
+                    case Selection.START:
+                        StartGame = true;
+                        break;
+                }
+
             }
+
         }
 
         private void GoBack(eButtonState buttonState, Vector2 intensity)
@@ -126,7 +160,7 @@ namespace THClone
             if (currentScreen == Screen.HIGH_SCORE)
                 currentScreen = Screen.MAIN;
             else
-                exitGame.Invoke();
+                GameInfo.ExitGame();
         }
         #endregion
     }
