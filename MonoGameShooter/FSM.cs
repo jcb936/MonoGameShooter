@@ -53,9 +53,10 @@ namespace THClone
                 // then transition to the next state
                 if (t.Condition())
                 {
-                    m_CurrentState.Exit(m_Owner);
+                    m_CurrentState.Exit(m_Owner, t.NextState);
+                    var oldState = m_CurrentState;
                     m_CurrentState = t.NextState;
-                    m_CurrentState.Enter(m_Owner);
+                    m_CurrentState.Enter(m_Owner, oldState);
                     break;
                 }
             }

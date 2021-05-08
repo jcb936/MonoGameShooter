@@ -16,7 +16,7 @@ namespace THClone
     public class THGame : Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        SpriteBatch spriteBatch; 
 
         //Our Explosion Sound.
         private SoundEffect explosionSound;
@@ -60,69 +60,32 @@ namespace THClone
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var player = new Player();
-            var hud = new HUD();
-
-            //Background
-            var bgLayer1 = new ParallaxingBackground();
-            var bgLayer2 = new ParallaxingBackground();
-
-            // Load the player resources
-            Animation playerAnimation = new Animation();
-            Texture2D playerTexture = Content.Load<Texture2D>("Graphics\\shipAnimation");
-            playerAnimation.Initialize(playerTexture, Vector2.Zero, 115, 69, 8, 30, Color.White, 1f, true);
-
-            // load the texture to serve as the laser
-            var laserTexture = Content.Load<Texture2D>("Graphics\\laser");
-
-            // Load the laserSound Effect and create the effect Instance
-            var laserSound = Content.Load<SoundEffect>("Sound\\laserFire");
-
-            Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
-            player.Initialize(playerAnimation, playerPosition, GraphicsDevice.Viewport, laserTexture, laserSound);
-
-            // Load the parallaxing background
-            bgLayer1.Initialize(Content, "Graphics/bgLayer1", GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, -1);
-            bgLayer2.Initialize(Content, "Graphics/bgLayer2", GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, -2);
-            var mainBackground = Content.Load<Texture2D>("Graphics/mainbackground");
-
-            var enemyTexture = Content.Load<Texture2D>("Graphics/mineAnimation");
-
-            // load the explosion sheet
-            var explosionTexture = Content.Load<Texture2D>("Graphics\\explosion");
-            Explosion.ExplosionTexture = explosionTexture;
-
-            // Load the laserSound Effect and create the effect Instance
-            explosionSound = Content.Load<SoundEffect>("Sound\\explosion");
-            explosionSoundInstance = explosionSound.CreateInstance();
-
             // Load the game music
             gameMusic = Content.Load<Song>("Sound\\gameMusic");
             // Start playing the music.
             MediaPlayer.Play(gameMusic);
 
-            // Load the score font
-            var font = Content.Load<SpriteFont>("Graphics\\gameFont");
-
-            // initialize HUD
-            var hudTexture = Content.Load<Texture2D>("Graphics\\t_blackSquare");
-            hud.Initialize(GraphicsDevice.Viewport, hudTexture, font);
-
             // Initialize menu state
-            var mainMenuTex = Content.Load<Texture2D>("Graphics\\t_mainMenu");
             var mainMenuState = new MenuState();
-            mainMenuState.Initialize(mainMenuTex, font, GraphicsDevice.Viewport);
+            mainMenuState.Initialize(GraphicsDevice.Viewport);
 
             // Initialize game state
             var gameState = new GameState();
-            gameState.Initialize(player, hud, bgLayer1, bgLayer2, enemyTexture, mainBackground, GraphicsDevice.Viewport);
+            gameState.Initialize(GraphicsDevice.Viewport);
+
+            // Initialize pause state
+            var pauseState = new PauseState();
+            pauseState.Initialise(GraphicsDevice.Viewport);
 
             // set transitions
             mainMenuState.AddTransition(new Transition(gameState, () => mainMenuState.StartGame));
             gameState.AddTransition(new Transition(mainMenuState, () => gameState.GameOver));
+            gameState.AddTransition(new Transition(pauseState, () => gameState.Pausing));
+            pauseState.AddTransition(new Transition(gameState, () => pauseState.Resume));
 
             mainLoop.AddState(mainMenuState);
             mainLoop.AddState(gameState);
+            mainLoop.AddState(pauseState);
 
             mainLoop.Initialise("MenuState");
         }
@@ -147,7 +110,6 @@ namespace THClone
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            EntityManager.Instance.Update(gameTime);
             CommandManager.Instance.Update();
             CollisionManager.Instance.Update();
 

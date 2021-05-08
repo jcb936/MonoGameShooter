@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,8 @@ namespace THClone
 {
     class GameState : State
     {
+        private ContentManager manager;
+
         private Player player;
 
         private HUD hud;
@@ -33,25 +37,27 @@ namespace THClone
 
         public bool GameOver { get; private set; }
 
+        public bool Pausing { get; private set; }
+
         public GameState()
         {
 
         }
 
-        public void Initialize(Player player, HUD hud, ParallaxingBackground layer1, ParallaxingBackground layer2, Texture2D enemyTexture, Texture2D mainBackground, Viewport viewport)
+        public void Initialize(Viewport viewport)
         {
             Name = "GameState";
 
+            manager = new ContentManager(GameInfo.GameInstance.Services, GameInfo.GameInstance.Content.RootDirectory);
+
             random = new Random();
 
-            this.player = player;
-            this.hud = hud;
+            this.player = new();
+            this.hud = new();
             this.viewport = viewport;
-            this.mainBackground = mainBackground;
 
-            bgLayer1 = layer1;
-            bgLayer2 = layer2;
-            this.enemyTexture = enemyTexture;
+            bgLayer1 = new();
+            bgLayer2 = new();
 
             // Set the time keepers to zero
             previousSpawnTime = TimeSpan.Zero;
@@ -60,15 +66,61 @@ namespace THClone
             enemySpawnTime = TimeSpan.FromSeconds(1.0f);
         }
 
-        public override void Enter(object owner)
+        public void LoadContent()
         {
-            GameInfo.CurrentScore = 0;
-            player.SetBindings();
-            CommandManager.Instance.AddKeyboardBinding(Keys.Escape, (_,_) => GameInfo.ExitGame());
-            EntityManager.Instance.AddEntity(player);
-            CollisionManager.Instance.AddCollidable(player);
+            // Load the player resources
+            Animation playerAnimation = new Animation();
+            Texture2D playerTexture = manager.Load<Texture2D>("Graphics\\shipAnimation");
 
-            player.PlayerDestroyed += GameOverSequence;
+            playerAnimation.Initialize(playerTexture, Vector2.Zero, 115, 69, 8, 30, Color.White, 1f, true);
+            // Load the parallaxing background
+            bgLayer1.Initialize(manager, "Graphics/bgLayer1", viewport.Width, viewport.Height, -1);
+            bgLayer2.Initialize(manager, "Graphics/bgLayer2", viewport.Width, viewport.Height, -2);
+            mainBackground = manager.Load<Texture2D>("Graphics/mainbackground");
+            enemyTexture = manager.Load<Texture2D>("Graphics/mineAnimation");
+
+            // load the texture to serve as the laser
+            var laserTexture = manager.Load<Texture2D>("Graphics\\laser");
+
+            // Load the laserSound Effect and create the effect Instance
+            var laserSound = manager.Load<SoundEffect>("Sound\\laserFire");
+
+            Vector2 playerPosition = new Vector2(viewport.TitleSafeArea.X, viewport.TitleSafeArea.Y + viewport.TitleSafeArea.Height / 2);
+            player.Initialize(playerAnimation, playerPosition, viewport, laserTexture, laserSound);
+
+            // load the explosion sheet
+            var explosionTexture = manager.Load<Texture2D>("Graphics\\explosion");
+            Explosion.ExplosionTexture = explosionTexture;
+
+            // Load the score font
+            var font = manager.Load<SpriteFont>("Graphics\\gameFont");
+
+            // initialize HUD
+            var hudTexture = manager.Load<Texture2D>("Graphics\\t_blackSquare");
+            hud.Initialize(viewport, hudTexture, font);
+        }
+
+        public void UnloadContent()
+        {
+            manager.Unload();
+        }
+
+        public override void Enter(object owner, State prevState)
+        {
+            Pausing = false;
+
+            if (prevState?.GetType() == typeof(MenuState))
+            {
+                LoadContent();
+                GameInfo.CurrentScore = 0;
+                EntityManager.Instance.AddEntity(player);
+                CollisionManager.Instance.AddCollidable(player);
+
+                player.PlayerDestroyed += GameOverSequence;
+            }
+
+            player.SetBindings();
+            CommandManager.Instance.AddKeyboardBinding(Keys.Escape, (bState, _) => Pausing = bState == eButtonState.PRESSED);
         }
 
         public override void Execute(object owner, GameTime gameTime)
@@ -79,14 +131,20 @@ namespace THClone
 
             // Update the enemies
             UpdateEnemies(gameTime);
+            EntityManager.Instance.Update(gameTime);
         }
 
-        public override void Exit(object owner)
+        public override void Exit(object owner, State nextState)
         {
             player.RemoveBindings();
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
 
-            player.PlayerDestroyed -= GameOverSequence;
+            // do cleanup
+            if (nextState?.GetType() == typeof(MenuState))
+            {
+                player.PlayerDestroyed -= GameOverSequence;
+                UnloadContent();
+            }
         }
 
         public override void Draw(object owner, SpriteBatch spriteBatch)
@@ -139,6 +197,7 @@ namespace THClone
 
         private void GameOverSequence()
         {
+            GameInfo.CheckIfHighscore();
             GameOver = true;
         }
     }

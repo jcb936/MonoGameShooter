@@ -9,7 +9,7 @@ namespace THClone
 {
     class GameOverState : State
     {
-        public override void Enter(object owner)
+        public override void Enter(object owner, State prevState)
         {
             throw new NotImplementedException();
         }
@@ -19,7 +19,7 @@ namespace THClone
             throw new NotImplementedException();
         }
 
-        public override void Exit(object owner)
+        public override void Exit(object owner, State nextState)
         {
             throw new NotImplementedException();
         }

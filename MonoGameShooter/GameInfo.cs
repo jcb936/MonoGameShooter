@@ -55,7 +55,7 @@ namespace THClone
 
         public static THGame GameInstance;
 
-        private static Leaderboard leaderboard;
+        private static Leaderboard leaderboard = new();
 
         private static string PlayerName = "Jacob";
 
@@ -66,18 +66,18 @@ namespace THClone
 
         public static void CheckIfHighscore()
         {
-            ReadXML("D:/City/GameArch/MonoGameShooter/MonoGameShooter/Content/leaderboard.xml");
+            ReadXML("Content/leaderboard.xml");
             if (currentScore > leaderboard.Entry.Score)
             {
                 leaderboard.Entry.Name = PlayerName;
                 leaderboard.Entry.Score = currentScore;
-                WriteXML("D:/City/GameArch/MonoGameShooter/MonoGameShooter/Content/leaderboard.xml");
+                WriteXML("Content/leaderboard.xml");
             }
         }
 
         public static Leaderboard GetHighscores()
         {
-            ReadXML("D:/City/GameArch/MonoGameShooter/MonoGameShooter/Content/leaderboard.xml");
+            ReadXML("Content/leaderboard.xml");
             return leaderboard;
         }
 
@@ -86,7 +86,9 @@ namespace THClone
             try
             {
                 using StreamReader reader = new StreamReader(filename);
-                leaderboard = (Leaderboard)new XmlSerializer(typeof(Leaderboard)).Deserialize(reader.BaseStream);
+                var lb = (Leaderboard)new XmlSerializer(typeof(Leaderboard)).Deserialize(reader.BaseStream);
+                leaderboard = lb;
+                
             }
             catch (Exception e)
             {
@@ -101,8 +103,8 @@ namespace THClone
         {
             try
             {
-                using StreamReader reader = new StreamReader(filename);
-                new XmlSerializer(typeof(Leaderboard)).Serialize(reader.BaseStream, leaderboard);
+                FileStream stream = File.OpenWrite(filename);
+                new XmlSerializer(typeof(Leaderboard)).Serialize(stream, leaderboard);
             }
             catch (Exception e)
             {

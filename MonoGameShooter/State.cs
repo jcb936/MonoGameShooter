@@ -10,8 +10,8 @@ namespace THClone
 {
     public abstract class State
     {
-        public abstract void Enter(object owner);
-        public abstract void Exit(object owner);
+        public abstract void Enter(object owner, State previousState = null);
+        public abstract void Exit(object owner, State nextState = null);
         public abstract void Execute(object owner, GameTime gameTime);
 
         public virtual void Draw(object owner, SpriteBatch spriteBatch) { }

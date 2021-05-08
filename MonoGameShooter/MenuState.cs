@@ -20,6 +20,8 @@ namespace THClone
 
         private SpriteFont font;
 
+        private ContentManager manager;
+
         private enum Selection
         {
             START = 0,
@@ -43,16 +45,28 @@ namespace THClone
 
         private Viewport viewport;
 
-        public void Initialize(Texture2D backgroundImage, SpriteFont font, Viewport viewport)
+        public void Initialize(Viewport viewport)
         {
+            manager = new(GameInfo.GameInstance.Services, GameInfo.GameInstance.Content.RootDirectory);
             Name = "MenuState";
-            this.backgroundImage = backgroundImage;
-            this.font = font;
             this.viewport = viewport;
         }
 
-        public override void Enter(object owner)
+        public void LoadContent()
         {
+            backgroundImage = manager.Load<Texture2D>("Graphics\\t_mainMenu");
+            font = manager.Load<SpriteFont>("Graphics\\gameFont");
+        }
+
+        public void UnloadContent()
+        {
+            manager.Unload();
+        }
+
+        public override void Enter(object owner, State prevState)
+        {
+            LoadContent();
+
             currentSelection = Selection.START;
             currentScreen = Screen.MAIN;
             currentPointerYOffset = 0f;
@@ -70,12 +84,14 @@ namespace THClone
         {
         }
 
-        public override void Exit(object owner)
+        public override void Exit(object owner, State nextState)
         {
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Down);
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Up);
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Enter);
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
+
+            UnloadContent();
         }
 
         public override void Draw(object owner, SpriteBatch spriteBatch)
