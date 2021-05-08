@@ -70,26 +70,28 @@ namespace THClone
         {
             // Load the player resources
             Animation playerAnimation = new Animation();
-            Texture2D playerTexture = manager.Load<Texture2D>("Graphics\\shipAnimation");
+            Texture2D playerAnimTex = manager.Load<Texture2D>("Graphics\\engine-Sheet");
 
-            playerAnimation.Initialize(playerTexture, Vector2.Zero, 115, 69, 8, 30, Color.White, 1f, true);
+            Texture2D playerTex = manager.Load<Texture2D>("Graphics\\ship");
+
+            playerAnimation.Initialize(playerAnimTex, Vector2.Zero, 32, 32, 4, 30, Color.White, 1f, true);
             // Load the parallaxing background
-            bgLayer1.Initialize(manager, "Graphics/bgLayer1", viewport.Width, viewport.Height, -1);
-            bgLayer2.Initialize(manager, "Graphics/bgLayer2", viewport.Width, viewport.Height, -2);
-            mainBackground = manager.Load<Texture2D>("Graphics/mainbackground");
+            bgLayer1.Initialize(manager, "Graphics/big_stars", viewport.Width, viewport.Height, 2);
+            bgLayer2.Initialize(manager, "Graphics/small_stars", viewport.Width, viewport.Height, 4);
+            mainBackground = manager.Load<Texture2D>("Graphics/black_background");
             enemyTexture = manager.Load<Texture2D>("Graphics/mineAnimation");
 
             // load the texture to serve as the laser
-            var laserTexture = manager.Load<Texture2D>("Graphics\\laser");
+            var bulletTexture = manager.Load<Texture2D>("Graphics\\bullet");
 
             // Load the laserSound Effect and create the effect Instance
             var laserSound = manager.Load<SoundEffect>("Sound\\laserFire");
 
             Vector2 playerPosition = new Vector2(viewport.TitleSafeArea.X, viewport.TitleSafeArea.Y + viewport.TitleSafeArea.Height / 2);
-            player.Initialize(playerAnimation, playerPosition, viewport, laserTexture, laserSound);
+            player.Initialize(playerAnimation, playerTex, playerPosition, viewport, bulletTexture, laserSound);
 
             // load the explosion sheet
-            var explosionTexture = manager.Load<Texture2D>("Graphics\\explosion");
+            var explosionTexture = manager.Load<Texture2D>("Graphics\\explosion-Sheet");
             Explosion.ExplosionTexture = explosionTexture;
 
             // Load the score font

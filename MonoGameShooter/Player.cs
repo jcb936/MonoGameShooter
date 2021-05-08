@@ -13,6 +13,8 @@ namespace THClone
         //public Texture2D PlayerTexture;
         public Animation PlayerAnimation;
 
+        private Texture2D playerSprite;
+
         // Position of the Player relative to the upper left side of the screen
         public Vector2 Position => position;
 
@@ -64,7 +66,7 @@ namespace THClone
 
         public event Action PlayerDestroyed;
 
-        public void Initialize(Animation animation, Vector2 position, Viewport viewport, Texture2D laserTexture, SoundEffect laserSound)
+        public void Initialize(Animation animation, Texture2D tex, Vector2 position, Viewport viewport, Texture2D laserTexture, SoundEffect laserSound)
         {
             deltaPosition = new Vector2();
 
@@ -76,13 +78,13 @@ namespace THClone
 
             FlaggedForRemoval = false;
 
-            BoundingRadius = animation.FrameWidth / 2f;
-
             laserSoundInstance = laserSound.CreateInstance();
 
             PlayerAnimation = animation;
 
-            PlayerAnimation.Rotation = MathHelper.ToRadians(-90f);
+            playerSprite = tex;
+
+            //PlayerAnimation.Rotation = MathHelper.ToRadians(-90f);
 
             // Set the starting position of the player around the middle of the screen and to the back
             this.position = position;
@@ -102,6 +104,9 @@ namespace THClone
             const float RATE_OF_FIRE = 800f;
             laserSpawnTime = TimeSpan.FromSeconds(SECONDS_IN_MINUTE / RATE_OF_FIRE);
             previousLaserSpawnTime = TimeSpan.Zero;
+
+            BoundingRadius = playerSprite.Width / 2f;
+
         }
 
         public void Update(GameTime gameTime)
@@ -110,10 +115,10 @@ namespace THClone
             position += deltaPosition;
 
             // Make sure that the player does not go out of bounds
-            position.X = MathHelper.Clamp(Position.X, Width / 2, viewport.Width - Width / 2);
-            position.Y = MathHelper.Clamp(Position.Y, Height / 2, viewport.Height - Height / 2);
+            position.X = MathHelper.Clamp(position.X, playerSprite.Width / 2, viewport.Width - playerSprite.Width / 2);
+            position.Y = MathHelper.Clamp(position.Y, playerSprite.Height / 2, viewport.Height - playerSprite.Height / 2);
 
-            PlayerAnimation.Position = Position;
+            PlayerAnimation.Position = new Vector2(position.X, position.Y + 50f);
             PlayerAnimation.Update(gameTime);
 
             if (isShooting)
@@ -130,6 +135,14 @@ namespace THClone
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            // draw ship
+            var destinationRect = new Rectangle((int)Position.X - (int)(playerSprite.Width / 2f), (int)Position.Y - (int)(playerSprite.Height / 2f), (int)(playerSprite.Width), (int)(playerSprite.Height));
+            var pos = new Vector2(Position.X - playerSprite.Width / 2, Position.Y - playerSprite.Height / 2);
+            //var sourceRect = new Rectangle(0, 0, playerSprite.Width, playerSprite.Height);
+            //spriteBatch.Draw(playerSprite, destinationRect, Color.White);
+            spriteBatch.Draw(playerSprite, pos, null, Color.White, 0f, new Vector2(), 1f, SpriteEffects.None, 0f);
+
+            // draw engine animation
             PlayerAnimation.Draw(spriteBatch);
         }
 
@@ -153,8 +166,8 @@ namespace THClone
             // initlize the laser animation
             laserAnimation.Initialize(laserTexture,
                 Position,
-                46,
-                16,
+                32,
+                43,
                 1,
                 30,
                 Color.White,
@@ -167,7 +180,7 @@ namespace THClone
             var laserPostion = Position;
             // Adjust the position slightly to match the muzzle of the cannon.
             laserPostion.Y -= 60;
-            laserPostion.X -= 25;
+            //laserPostion.X += 30;
 
             // init the laser
             laser.Initialize(laserAnimation, laserPostion);

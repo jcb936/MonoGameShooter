@@ -117,7 +117,7 @@ namespace THClone
             if (Active)
             {
                 //spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color);
-                spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color, Rotation, new Vector2(FrameWidth / 2f, FrameHeight / 2f), SpriteEffects.None, 0);
+                spriteBatch.Draw(spriteStrip, destinationRect, sourceRect, color, Rotation, new Vector2(), SpriteEffects.None, 0);
             }
         }
     }

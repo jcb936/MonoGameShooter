@@ -29,9 +29,9 @@ namespace THClone
 
             explosionAnimation.Initialize(ExplosionTexture,
                 position,
-                134,
-                134,
-                12,
+                64,
+                64,
+                6,
                 30,
                 Color.White,
                 1.0f,

@@ -23,6 +23,7 @@ namespace THClone
 
         public void Initialize(ContentManager content, String texturePath, int screenWidth, int screenHeight, int speed)
         {
+            //bgHeight = screenHeight;
             bgHeight = screenHeight;
             bgWidth = screenWidth;
 
@@ -34,14 +35,14 @@ namespace THClone
 
             // If we divide the screen with the texture width then we can determine the number of tiles need.
             // We add 1 to it so that we won't have a gap in the tiling
-            int numOfTiles = (int)(Math.Ceiling(screenWidth / (float)texture.Width) + 1);
+            int numOfTiles = (int)(Math.Ceiling(screenHeight / (float)texture.Height) + 1);
             positions = new Vector2[numOfTiles];
 
             // Set the initial positions of the parallaxing background
             for (int i = 0; i < positions.Length; i++)
             {
                 // We need the tiles to be side by side to create a tiling effect
-                positions[i] = new Vector2(i * texture.Width, 0);
+                positions[i] = new Vector2(0, i * texture.Height); // this is 2
             }
         }
 
@@ -51,7 +52,7 @@ namespace THClone
             for (int i = 0; i < positions.Length; i++)
             {
                 // Update the position of the screen by adding the speed
-                positions[i].X += speed;
+                positions[i].Y += speed;
 
                 /*
                 //If the speed has the background moving to the left.
@@ -77,7 +78,7 @@ namespace THClone
                 if (speed <= 0)
                 {
                     // Check the texture is out of view then put that texture at the end of the screen
-                    if (positions[i].X <= -texture.Width)
+                    if (positions[i].Y <= -texture.Height)
                     {
                         WrapTextureToLeft(i);
                     }
@@ -86,9 +87,9 @@ namespace THClone
                 else
                 {
                     // Check if the texture is out of view then position it to the start of the screen
-                    if (positions[i].X >= texture.Width * (positions.Length - 1))
+                    if (positions[i].Y >= texture.Height * (positions.Length - 1))
                     {
-                        WrapTextureToRight(i);
+                        WrapTexturUp(i);
                     }
                 }
             }
@@ -102,10 +103,10 @@ namespace THClone
             if (prevTexture < 0)
                 prevTexture = positions.Length - 1;
 
-            positions[index].X = positions[prevTexture].X + texture.Width;
+            positions[index].Y = positions[prevTexture].Y + texture.Height;
         }
 
-        private void WrapTextureToRight(int index)
+        private void WrapTexturUp(int index)
         {
             // If the textures are scrolling to the right, when the tile wraps, it should be placed to the left
             // of the tile that comes after it.
@@ -113,7 +114,7 @@ namespace THClone
             if (nextTexture == positions.Length)
                 nextTexture = 0;
 
-            positions[index].X = positions[nextTexture].X - texture.Width;
+            positions[index].Y = positions[nextTexture].Y - texture.Height;
         }
 
         public void Draw(SpriteBatch spriteBatch)

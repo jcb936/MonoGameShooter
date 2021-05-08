@@ -21,6 +21,8 @@ namespace THClone
         // set the laser to active
         public bool Active { get; set; }
 
+        private float lifeTime;
+
         // Laser beams range.
         int Range;
 
@@ -45,18 +47,29 @@ namespace THClone
 
         public void Initialize(Animation animation, Vector2 position)
         {
+            lifeTime = 3f;
             LaserAnimation = animation;
             this.position = position;
             BoundingRadius = animation.FrameWidth / 2f;
             Active = true;
-            LaserAnimation.Rotation = MathHelper.ToRadians(90f);
+            //LaserAnimation.Rotation = MathHelper.ToRadians(90f);
         }
 
         public void Update(GameTime gameTime)
         {
+            if (!Active)
+                return;
+
             position.Y -= laserMoveSpeed;
             LaserAnimation.Position = Position;
             LaserAnimation.Update(gameTime);
+
+            lifeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (lifeTime < 0f)
+            {
+                Active = false;
+                FlaggedForRemoval = true;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -77,7 +90,7 @@ namespace THClone
             if (obj.GetType() == typeof(Enemy))
             {
                 if ((obj as Enemy).Active)
-                {
+                 {
                     // add explosion
                     FlaggedForRemoval = true;
                     Active = false;

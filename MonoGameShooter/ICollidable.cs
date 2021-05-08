@@ -15,6 +15,9 @@ namespace THClone
         public bool FlaggedForRemoval { get; }
 
         public Vector2 Position { get; }
+
+        public bool Active { get; set; }
+
         #endregion
 
         #region Member Functions

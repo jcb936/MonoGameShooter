@@ -85,11 +85,12 @@ namespace THClone
             EnemyAnimation.Update(gameTime);
 
             // If the enemy is past the screen or its health reaches 0 then deactivate it
-            if (Position.X < -Width || Health <= 0)
+            if (Position.X < 0 || Health <= 0)
             {
                 // By setting the Active flag to false, the game will remove this objet from the
                 // active game list
                 Active = false;
+                FlaggedForRemoval = true;
             }
         }
 

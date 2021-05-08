@@ -97,7 +97,7 @@ namespace THClone
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
-            explosionSoundInstance.Dispose();
+            //explosionSoundInstance.Dispose();
 
             //Stop playing the music
             MediaPlayer.Stop();
@@ -111,9 +111,9 @@ namespace THClone
         protected override void Update(GameTime gameTime)
         {
             CommandManager.Instance.Update();
-            CollisionManager.Instance.Update();
 
             mainLoop.Update(gameTime);
+            CollisionManager.Instance.Update();
 
             base.Update(gameTime);
         }

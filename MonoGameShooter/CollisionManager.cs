@@ -62,7 +62,7 @@ namespace THClone
                     if (!collidable1.Equals(collidable2))
                     {
                         // If the two objects are colliding then add them to the set
-                        if (collidable1.CollisionTest(collidable2))
+                        if (collidable1.Active && collidable2.Active && collidable1.CollisionTest(collidable2))
                         {
                             m_Collisions.Add(new Collision(collidable1, collidable2));
                         }
