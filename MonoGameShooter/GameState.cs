@@ -249,7 +249,7 @@ namespace THClone
         {
             Animation powerupAnim = new();
 
-            powerupAnim.Initialize(powerupTex, Vector2.Zero, 64, 87, 1, 30, Color.White, 5f, true);
+            powerupAnim.Initialize(powerupTex, Vector2.Zero, 64, 87, 1, 30, Color.White, 1f, true);
             Vector2 powerupPos = new Vector2(random.Next(10, viewport.Width - 10), -10);
 
             var powerup = new Powerup();

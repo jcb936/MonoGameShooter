@@ -54,6 +54,9 @@ namespace THClone
                 return;
 
             position.Y += speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            powerupAnim.Position = position;
+
+            powerupAnim.Update(gameTime);
 
             if (position.Y > 1920)
                 Active = false;
