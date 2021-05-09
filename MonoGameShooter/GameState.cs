@@ -38,6 +38,8 @@ namespace THClone
 
         private Texture2D enemyLaserTexture;
 
+        private Texture2D powerupTex;
+
         private Viewport viewport;
 
         private Random random;
@@ -50,6 +52,8 @@ namespace THClone
 
         private float waveSpawnTimer;
 
+        private float powerupSpawnTimer;
+
         private WaveInfo currentWave;
 
         private int currentWaveIndex;
@@ -58,10 +62,6 @@ namespace THClone
 
         public bool Pausing { get; private set; }
 
-        public GameState()
-        {
-
-        }
 
         public void Initialize(Viewport viewport)
         {
@@ -97,8 +97,9 @@ namespace THClone
             // Load the parallaxing background
             bgLayer1.Initialize(manager, "Graphics/big_stars", viewport.Width, viewport.Height, 2);
             bgLayer2.Initialize(manager, "Graphics/small_stars", viewport.Width, viewport.Height, 4);
-            mainBackground = manager.Load<Texture2D>("Graphics/black_background");
-            enemyTexture = manager.Load<Texture2D>("Graphics/enemyAnimation");
+            mainBackground = manager.Load<Texture2D>("Graphics\\black_background");
+            enemyTexture = manager.Load<Texture2D>("Graphics\\enemyAnimation");
+            powerupTex = manager.Load<Texture2D>("Graphics\\powerup");
 
             // load the texture to serve as the laser
             var bulletTexture = manager.Load<Texture2D>("Graphics\\bullet");
@@ -134,6 +135,7 @@ namespace THClone
 
             if (prevState?.GetType() == typeof(MenuState))
             {
+                powerupSpawnTimer = 5f;
                 currentWaveIndex = 0;
                 currentLevelInfo = GameInfo.GetLevelInfo();
                 currentWave = currentLevelInfo.Waves[currentWaveIndex];
@@ -143,6 +145,7 @@ namespace THClone
                 CollisionManager.Instance.AddCollidable(player);
 
                 player.PlayerDestroyed += GameOverSequence;
+                GameInfo.BossDestroyedEvent += GameOverSequence;
 
                 waveSpawnTimer = 1f;
                 currentLevelState = eLevelState.WAVE;
@@ -172,6 +175,16 @@ namespace THClone
                 }
             }
 
+            if (powerupSpawnTimer > 0f)
+            {
+                powerupSpawnTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (powerupSpawnTimer < 0f)
+                {
+                    powerupSpawnTimer = random.Next(10, 20);
+                    SpawnPowerup();
+                }
+            }
+
             // Update the enemies
             if (currentLevelState == eLevelState.WAVE)
                 UpdateEnemies(gameTime);
@@ -187,9 +200,10 @@ namespace THClone
             CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
 
             // do cleanup
-            if (nextState?.GetType() == typeof(MenuState))
+            if (nextState?.GetType() == typeof(GameOverState))
             {
                 player.PlayerDestroyed -= GameOverSequence;
+                GameInfo.BossDestroyedEvent -= GameOverSequence;
                 UnloadContent();
             }
         }
@@ -229,6 +243,20 @@ namespace THClone
             // Add the enemy to the active enemies list
             EntityManager.Instance.AddEntity(enemy);
             CollisionManager.Instance.AddCollidable(enemy);
+        }
+
+        private void SpawnPowerup()
+        {
+            Animation powerupAnim = new();
+
+            powerupAnim.Initialize(powerupTex, Vector2.Zero, 64, 87, 1, 30, Color.White, 5f, true);
+            Vector2 powerupPos = new Vector2(random.Next(10, viewport.Width - 10), -10);
+
+            var powerup = new Powerup();
+            powerup.Initialise(powerupAnim, powerupPos);
+
+            EntityManager.Instance.AddEntity(powerup);
+            CollisionManager.Instance.AddCollidable(powerup);
         }
 
         private void SpawnBoss(GameTime gameTime)

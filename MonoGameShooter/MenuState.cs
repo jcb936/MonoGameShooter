@@ -25,8 +25,7 @@ namespace THClone
         private enum Selection
         {
             START = 0,
-            HIGH_SCORE = 1,
-            QUIT = 2
+            QUIT = 1
         }
 
         private enum Screen
@@ -66,10 +65,10 @@ namespace THClone
         public override void Enter(object owner, State prevState)
         {
             LoadContent();
-
+            GameInfo.BossDestroyed = false;
             currentSelection = Selection.START;
             currentScreen = Screen.MAIN;
-            currentPointerYOffset = 0f;
+            currentPointerYOffset = -80f;
             StartGame = false;
             if (owner.GetType() == typeof(Game))
                 exitGame = () => (owner as Game).Exit();
@@ -121,9 +120,6 @@ namespace THClone
                 case Selection.START:
                     currentPointerYOffset = -80f;
                     break;
-                case Selection.HIGH_SCORE:
-                    currentPointerYOffset = 0;
-                    break;
                 case Selection.QUIT:
                     currentPointerYOffset = 80f;
                     break;
@@ -135,7 +131,7 @@ namespace THClone
         {
             if (buttonState == eButtonState.PRESSED)
             {
-                currentSelection = (Selection)(((int)currentSelection + 1) % 3);
+                currentSelection = (Selection)(((int)currentSelection + 1) % 2);
 
                 SetPointerLocation();
             }
@@ -146,7 +142,7 @@ namespace THClone
             if (buttonState == eButtonState.PRESSED)
             {
                 int selectionInt = (int)currentSelection;
-                selectionInt = (selectionInt - 1) >= 0 ? selectionInt - 1 : 3;
+                selectionInt = (selectionInt - 1) >= 0 ? selectionInt - 1 : 1;
                 currentSelection = (Selection)selectionInt;
 
                 SetPointerLocation();
@@ -163,8 +159,6 @@ namespace THClone
                     case Selection.QUIT:
                         GameInfo.ExitGame();
                         break;
-                    case Selection.HIGH_SCORE:
-                        break;
                     case Selection.START:
                         StartGame = true;
                         break;
@@ -176,10 +170,14 @@ namespace THClone
 
         private void GoBack(eButtonState buttonState, Vector2 intensity)
         {
-            if (currentScreen == Screen.HIGH_SCORE)
-                currentScreen = Screen.MAIN;
-            else
-                GameInfo.ExitGame();
+            if (buttonState == eButtonState.PRESSED)
+            {
+                if (currentScreen == Screen.HIGH_SCORE)
+                    currentScreen = Screen.MAIN;
+                else
+                    GameInfo.ExitGame();
+            }
+
         }
         #endregion
     }

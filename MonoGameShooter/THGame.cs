@@ -77,15 +77,21 @@ namespace THClone
             var pauseState = new PauseState();
             pauseState.Initialise(GraphicsDevice.Viewport);
 
+            // Initialize game over state
+            var gameOverState = new GameOverState();
+            gameOverState.Initialise(GraphicsDevice.Viewport);
+
             // set transitions
             mainMenuState.AddTransition(new Transition(gameState, () => mainMenuState.StartGame));
-            gameState.AddTransition(new Transition(mainMenuState, () => gameState.GameOver));
+            gameState.AddTransition(new Transition(gameOverState, () => gameState.GameOver));
             gameState.AddTransition(new Transition(pauseState, () => gameState.Pausing));
             pauseState.AddTransition(new Transition(gameState, () => pauseState.Resume));
+            gameOverState.AddTransition(new Transition(mainMenuState, () => gameOverState.BackToMenu));
 
             mainLoop.AddState(mainMenuState);
             mainLoop.AddState(gameState);
             mainLoop.AddState(pauseState);
+            mainLoop.AddState(gameOverState);
 
             mainLoop.Initialise("MenuState");
         }

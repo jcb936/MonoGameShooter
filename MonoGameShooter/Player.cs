@@ -61,6 +61,10 @@ namespace THClone
 
         private bool isShooting;
 
+        private bool powerupActive;
+
+        private float powerupTimer;
+
         public event Action PlayerDestroyed;
 
         public void Initialize(Animation animation, Texture2D tex, Vector2 position, Viewport viewport, Texture2D laserTexture, SoundEffect laserSound)
@@ -80,6 +84,10 @@ namespace THClone
             PlayerAnimation = animation;
 
             playerSprite = tex;
+
+            powerupActive = false;
+
+            powerupTimer = -1f;
 
             //PlayerAnimation.Rotation = MathHelper.ToRadians(-90f);
 
@@ -120,6 +128,14 @@ namespace THClone
             if (isShooting)
                 FireLaser(gameTime);
 
+            if (powerupTimer > 0f)
+            {
+                powerupTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (powerupTimer < 0f)
+                    powerupActive = false;
+            }
+
             // reset score if player health goes to zero
             if (GameInfo.Health <= 0)
             {
@@ -150,7 +166,8 @@ namespace THClone
                 previousLaserSpawnTime = gameTime.TotalGameTime;
                 // Add the laer to our list.
                 AddLaser();
-                //PowerupLaser();
+                if (powerupActive)
+                    PowerupLaser();
                 // Play the laser sound!
                 laserSoundInstance.Play();
             }
@@ -264,7 +281,11 @@ namespace THClone
         #region ICollidable interface
         public void OnCollision(ICollidable obj)
         {
-            // do stuff
+            if (obj.GetType() == typeof(Powerup))
+            {
+                powerupTimer = 5f;
+                powerupActive = true;
+            }
         }
         #endregion
 

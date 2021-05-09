@@ -30,7 +30,7 @@ namespace THClone
 
         public void LoadContent()
         {
-            backTex = manager.Load<Texture2D>("Graphics\\t_mainMenu");
+            backTex = manager.Load<Texture2D>("Graphics\\black_background");
             font = manager.Load<SpriteFont>("Graphics\\gameFont");
         }
 
@@ -68,10 +68,10 @@ namespace THClone
         public override void Draw(object owner, SpriteBatch spriteBatch)
         {
             var rect = new Rectangle(0, 0, viewport.Width, viewport.Height);
-            //spriteBatch.Draw(backTex, rect, Color.White);
+            spriteBatch.Draw(backTex, rect, Color.White);
             spriteBatch.DrawString(font, "Pause!", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f)), Color.White);
-            spriteBatch.DrawString(font, "Press ESC to return to the game", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 20)), Color.White);
-            spriteBatch.DrawString(font, "Press Q to exit the game", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f - + 40f)), Color.White);
+            spriteBatch.DrawString(font, "Press ESC to return to the game", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 40)), Color.White);
+            spriteBatch.DrawString(font, "Press Q to exit the game", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 80f)), Color.White);
         }
     }
 }

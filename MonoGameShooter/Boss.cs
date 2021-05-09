@@ -18,9 +18,9 @@ namespace THClone
         {
             base.Initialize(animation, position, laserTex, left);
             Health = 10000;
-            Damage = 20;
+            Damage = 100;
             Value = 1000;
-            enemyMoveSpeed = 2f;
+            enemyMoveSpeed = 50f;
             rotation = 0f;
             // init our laser
             const float SECONDS_IN_MINUTE = 60f;
@@ -35,7 +35,7 @@ namespace THClone
                 return;
 
             // The enemy always moves to the left so decrement it's x position
-            position.Y += enemyMoveSpeed;
+            position.Y += enemyMoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             position.Y = Math.Clamp(position.Y, -30f, 200f);
 
@@ -58,6 +58,7 @@ namespace THClone
                 // active game list
                 Explosion.Create(position);
                 Active = false;
+                GameInfo.BossDestroyed = true;
                 //FlaggedForRemoval = true;
             }
         }
@@ -105,6 +106,26 @@ namespace THClone
                 // Play the laser sound!
                 //laserSoundInstance.Play();
             }
+        }
+
+        public override void OnCollision(ICollidable obj)
+        {
+            if (!Active)
+                return;
+
+            Type objType = obj.GetType();
+
+            if ((objType == typeof(Laser) && !(obj as Laser).EnemyLaser))
+            {
+                Health -= (obj as Laser).Damage;
+                if (Health <= 0)
+                    GameInfo.CurrentScore += Value;
+            }
+            else if (objType == typeof(Player))
+            {
+                GameInfo.Health -= Damage;
+            }
+
         }
     }
 }

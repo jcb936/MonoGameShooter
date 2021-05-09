@@ -29,13 +29,17 @@ namespace THClone
     [Serializable]
     public struct Leaderboard
     {
+        [XmlElement]
         public LeaderboardEntry Entry;
     }
 
     [Serializable]
     public struct LeaderboardEntry
     {
+        [XmlElement]
         public string Name;
+
+        [XmlElement]
         public int Score;
     }
 
@@ -62,6 +66,18 @@ namespace THClone
             }
         }
 
+        public static bool BossDestroyed
+        {
+            get => bossDestroyed;
+            set
+            {
+                bossDestroyed = value;
+                BossDestroyedEvent?.Invoke();
+            }
+        }
+
+        private static bool bossDestroyed;
+
         private static int health;
 
         private static int currentScore;
@@ -69,6 +85,8 @@ namespace THClone
         public static event Action<int> ScoreUpdated;
 
         public static event Action<int> HealthUpdated;
+
+        public static event Action BossDestroyedEvent;
 
         public static THGame GameInstance;
 

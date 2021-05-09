@@ -68,13 +68,13 @@ namespace THClone
             Active = true;
 
             // Set the health of the enemy
-            Health = 50;
+            Health = 30;
 
             // Set the amount of damage the enemy can do
             Damage = 10;
 
             // Set how fast the enemy moves
-            enemyMoveSpeed = 6f;
+            enemyMoveSpeed = 150f;
 
             // Set the score value of the enemy
             Value = 100;
@@ -99,9 +99,9 @@ namespace THClone
 
             // The enemy always moves to the left so decrement it's x position
             if (left)
-                position.X += enemyMoveSpeed;
+                position.X += enemyMoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             else
-                position.X -= enemyMoveSpeed;
+                position.X -= enemyMoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // Update the position of the Animation
             EnemyAnimation.Position = Position;
@@ -117,7 +117,6 @@ namespace THClone
                 // By setting the Active flag to false, the game will remove this objet from the
                 // active game list
                 Explosion.Create(position);
-                GameInfo.CurrentScore += Value;
                 Active = false;
                 FlaggedForRemoval = true;
             }
@@ -174,7 +173,7 @@ namespace THClone
             // laserSoundInstance.Play();
         }
 
-        public void OnCollision(ICollidable obj)
+        public virtual void OnCollision(ICollidable obj)
         {
             if (!Active)
                 return;
@@ -184,6 +183,8 @@ namespace THClone
             if ((objType == typeof(Laser) && !(obj as Laser).EnemyLaser))
             {
                 Health -= (obj as Laser).Damage;
+                if (Health <= 0)
+                    GameInfo.CurrentScore += Value;
             }
             else if (objType == typeof(Player))
             {
