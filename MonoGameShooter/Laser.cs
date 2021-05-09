@@ -108,7 +108,7 @@ namespace THClone
                 GameInfo.Health -= Damage;
             }
 
-            if (obj.GetType() == typeof(Enemy) && !EnemyLaser)
+            if (obj is Enemy && !EnemyLaser)
             {
                 if ((obj as Enemy).Active)
                  {

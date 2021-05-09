@@ -79,7 +79,7 @@ namespace THClone
             // Set the score value of the enemy
             Value = 100;
 
-            BoundingRadius = animation.FrameWidth / 2f;
+            BoundingRadius = animation.FrameHeight / 2f;
 
             // init our laser
             const float SECONDS_IN_MINUTE = 60f;

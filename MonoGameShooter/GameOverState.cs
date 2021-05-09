@@ -51,7 +51,7 @@ namespace THClone
             else
                 text = "Game over!";
 
-            CommandManager.Instance.AddKeyboardBinding(Keys.Escape, (bState, _) => BackToMenu = bState == eButtonState.PRESSED);
+            CommandManager.Instance.AddKeyboardBinding(Keys.Q, (bState, _) => BackToMenu = bState == eButtonState.PRESSED);
         }
 
         public override void Execute(object owner, GameTime gameTime)
@@ -62,7 +62,7 @@ namespace THClone
         {
             UnloadContent();
 
-            CommandManager.Instance.RemoveKeyboardBinding(Keys.Escape);
+            CommandManager.Instance.RemoveKeyboardBinding(Keys.Q);
         }
 
         public override void Draw(object owner, SpriteBatch spriteBatch)
@@ -71,7 +71,7 @@ namespace THClone
             spriteBatch.Draw(backTex, rect, Color.White);
             spriteBatch.DrawString(font, text, new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f)), Color.White);
             spriteBatch.DrawString(font, "Your score is: " + GameInfo.CurrentScore, new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 40)), Color.White);
-            spriteBatch.DrawString(font, "Press Esc to go back to main menu", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 80f)), Color.White);
+            spriteBatch.DrawString(font, "Press Q to go back to main menu", new Vector2(viewport.TitleSafeArea.Width / 2f, (viewport.TitleSafeArea.Height / 2f + 80f)), Color.White);
         }
     }
 }

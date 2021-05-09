@@ -17,7 +17,7 @@ namespace THClone
         public override void Initialize(Animation animation, Vector2 position, Texture2D laserTex, bool left = false)
         {
             base.Initialize(animation, position, laserTex, left);
-            Health = 10000;
+            Health = 2000;
             Damage = 100;
             Value = 1000;
             enemyMoveSpeed = 50f;

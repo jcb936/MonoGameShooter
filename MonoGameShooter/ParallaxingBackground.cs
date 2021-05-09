@@ -53,26 +53,6 @@ namespace THClone
             {
                 // Update the position of the screen by adding the speed
                 positions[i].Y += speed;
-
-                /*
-                //If the speed has the background moving to the left.
-                if (speed <= 0)
-                {
-                    // Check if the texture is out of view and then put that texture at the end of the screen.
-                    if (positions[i].X <= -texture.Width)
-                    {
-                        positions[i].X = texture.Width * (positions.Length - 1);
-                    }
-                }
-                else
-                {
-                    // Check if the texture is out of view then position it to the start of the screen
-                    if (positions[i].X >= texture.Width * (positions.Length - 1))
-                    {
-                        positions[i].X = -texture.Width;
-                    }
-                }
-                */
                 
                 // If the speed has the background moving to the left
                 if (speed <= 0)
@@ -80,7 +60,7 @@ namespace THClone
                     // Check the texture is out of view then put that texture at the end of the screen
                     if (positions[i].Y <= -texture.Height)
                     {
-                        WrapTextureToLeft(i);
+                        WrapTextureDown(i);
                     }
                 }
                 // If the speed has the background moving to the right
@@ -95,7 +75,7 @@ namespace THClone
             }
         }
 
-        private void WrapTextureToLeft(int index)
+        private void WrapTextureDown(int index)
         {
             // If the textures are scrolling to the left, when the tile wraps, it should be put at the
             // one pixel to the right of the tile before it.

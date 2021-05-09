@@ -135,6 +135,7 @@ namespace THClone
 
             if (prevState?.GetType() == typeof(MenuState))
             {
+                GameOver = false;
                 powerupSpawnTimer = 5f;
                 currentWaveIndex = 0;
                 currentLevelInfo = GameInfo.GetLevelInfo();
@@ -166,12 +167,14 @@ namespace THClone
                 waveSpawnTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (waveSpawnTimer < 0f)
                 {
-                    waveSpawnTimer = 15f;
                     currentWaveIndex++;
-                    if (currentWaveIndex == currentLevelInfo.Waves.Length)
+                    if (currentWaveIndex >= currentLevelInfo.Waves.Length)
                         currentLevelState = eLevelState.SPAWNBOSS;
                     else
+                    {
+                        waveSpawnTimer = 15f;
                         currentWave = currentLevelInfo.Waves[currentWaveIndex];
+                    }
                 }
             }
 
@@ -232,7 +235,7 @@ namespace THClone
 
             // Randomly generate the position of the enemy
             float xPos = currentWave.Left ? 0 - (enemyTexture.Width / 2) : viewport.Width + enemyTexture.Width / 2;
-            Vector2 position = new Vector2(xPos, random.Next(100, viewport.Height - 100));
+            Vector2 position = new Vector2(xPos, random.Next(100, viewport.Height / 2));
 
             // Create an enemy
             Enemy enemy = new Enemy();

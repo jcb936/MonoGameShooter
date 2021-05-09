@@ -6,8 +6,12 @@
     <Left>true</Left>
   </WaveInfo>
   <WaveInfo>
-    <NumberOfEnemies>10</NumberOfEnemies>
+    <NumberOfEnemies>6</NumberOfEnemies>
     <Left>false</Left>
+  </WaveInfo>
+  <WaveInfo>
+    <NumberOfEnemies>5</NumberOfEnemies>
+    <Left>true</Left>
   </WaveInfo>
   <WaveInfo>
     <NumberOfEnemies>5</NumberOfEnemies>
