@@ -69,6 +69,14 @@ namespace THClone
                     }
                 }
             }
+
+            // Iterate through collidable objects and test for collisions between each one
+            for (int i = m_Collidables.Count - 1; i >= 0; --i)
+            {
+                if (!m_Collidables[i].Active)
+                    RemoveCollidable(m_Collidables[i]);
+
+            }
         }
 
 

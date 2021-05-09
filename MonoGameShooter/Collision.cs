@@ -48,7 +48,8 @@ namespace THClone
 
         public void Resolve()
         {
-            this.A.OnCollision(this.B);
+            if (this.A.Active && this.B.Active)
+                this.A.OnCollision(this.B);
         }
 
     }

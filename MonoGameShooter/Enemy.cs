@@ -9,6 +9,8 @@ namespace THClone
         // Animation representing the enemy
         public Animation EnemyAnimation;
 
+        protected Texture2D laserTexture;
+
         // The position of the enemy ship relative to the top left corner of thescreen
         public Vector2 Position => position;
 
@@ -42,12 +44,19 @@ namespace THClone
         public bool FlaggedForRemoval { get; private set; }
         #endregion
 
-        private Vector2 position;
+        protected Vector2 position;
 
         // The speed at which the enemy moves
-        float enemyMoveSpeed;
+        protected float enemyMoveSpeed;
 
-        public void Initialize(Animation animation, Vector2 position)
+        // govern how fast our laser can fire.
+        protected TimeSpan laserSpawnTime;
+        protected TimeSpan previousLaserSpawnTime;
+
+        private bool left;
+
+
+        public virtual void Initialize(Animation animation, Vector2 position, Texture2D laserTex, bool left = false)
         {
             // Load the enemy ship texture
             EnemyAnimation = animation;
@@ -59,7 +68,7 @@ namespace THClone
             Active = true;
 
             // Set the health of the enemy
-            Health = 10;
+            Health = 50;
 
             // Set the amount of damage the enemy can do
             Damage = 10;
@@ -71,12 +80,28 @@ namespace THClone
             Value = 100;
 
             BoundingRadius = animation.FrameWidth / 2f;
+
+            // init our laser
+            const float SECONDS_IN_MINUTE = 60f;
+            const float RATE_OF_FIRE = 150;
+            laserSpawnTime = TimeSpan.FromSeconds(SECONDS_IN_MINUTE / RATE_OF_FIRE);
+            previousLaserSpawnTime = TimeSpan.Zero;
+
+            laserTexture = laserTex;
+
+            this.left = left;
         }
 
-        public void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
+            if (!Active)
+                return;
+
             // The enemy always moves to the left so decrement it's x position
-            position.X -= enemyMoveSpeed;
+            if (left)
+                position.X += enemyMoveSpeed;
+            else
+                position.X -= enemyMoveSpeed;
 
             // Update the position of the Animation
             EnemyAnimation.Position = Position;
@@ -84,11 +109,15 @@ namespace THClone
             // Update Animation
             EnemyAnimation.Update(gameTime);
 
+            FireLaser(gameTime);
+
             // If the enemy is past the screen or its health reaches 0 then deactivate it
-            if (Position.X < 0 || Health <= 0)
+            if ((Position.X < 0 && !left) || (Position.X > 1080 && left) || Health <= 0)
             {
                 // By setting the Active flag to false, the game will remove this objet from the
                 // active game list
+                Explosion.Create(position);
+                GameInfo.CurrentScore += Value;
                 Active = false;
                 FlaggedForRemoval = true;
             }
@@ -100,6 +129,51 @@ namespace THClone
             EnemyAnimation.Draw(spriteBatch);
         }
 
+        protected virtual void FireLaser(GameTime gameTime)
+        {
+            // govern the rate of fire for our lasers
+            if (gameTime.TotalGameTime - previousLaserSpawnTime > laserSpawnTime)
+            {
+                previousLaserSpawnTime = gameTime.TotalGameTime;
+                // Add the laer to our list.
+                AddLaser();
+                // Play the laser sound!
+                //laserSoundInstance.Play();
+            }
+        }
+
+        protected virtual void AddLaser()
+        {
+            Animation laserAnimation = new Animation();
+            // initlize the laser animation
+            laserAnimation.Initialize(laserTexture,
+                Position,
+                16,
+                16,
+                1,
+                30,
+                Color.White,
+                1f,
+                true);
+
+            Laser laser = new Laser();
+            // Get the starting postion of the laser.
+
+            var laserPostion = Position;
+            // Adjust the position slightly to match the muzzle of the cannon.
+            laserPostion.Y += 30;
+            //laserPostion.X += 30;
+
+            // init the laser
+            laser.Initialize(laserAnimation, laserPostion, 0f, eBulletDirection.DOWN, true, 0.5f);
+
+            EntityManager.Instance.AddEntity(laser);
+            CollisionManager.Instance.AddCollidable(laser);
+
+            /* todo: add code to create a laser. */
+            // laserSoundInstance.Play();
+        }
+
         public void OnCollision(ICollidable obj)
         {
             if (!Active)
@@ -107,18 +181,14 @@ namespace THClone
 
             Type objType = obj.GetType();
 
-            if (objType == typeof(Laser) || objType == typeof(Player))
+            if ((objType == typeof(Laser) && !(obj as Laser).EnemyLaser))
             {
-                Explosion.Create(position);
+                Health -= (obj as Laser).Damage;
+            }
+            else if (objType == typeof(Player))
+            {
                 Health = 0;
-                GameInfo.CurrentScore += Value;
-
-                if (objType == typeof(Player))
-                {
-                    Player playerRef = obj as Player;
-                    GameInfo.Health -= Damage;
-                }
-
+                GameInfo.Health -= Damage;
             }
 
         }

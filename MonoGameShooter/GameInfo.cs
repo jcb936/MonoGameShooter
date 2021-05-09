@@ -10,6 +10,23 @@ using System.IO;
 namespace THClone
 {
     [Serializable]
+    public struct LevelInfo
+    {
+        [XmlArray]
+        public WaveInfo[] Waves;
+    }
+
+    [Serializable]
+    public struct WaveInfo
+    {
+        [XmlElement]
+        public int NumberOfEnemies;
+
+        [XmlElement]
+        public bool Left;
+    }
+
+    [Serializable]
     public struct Leaderboard
     {
         public LeaderboardEntry Entry;
@@ -57,7 +74,9 @@ namespace THClone
 
         private static Leaderboard leaderboard = new();
 
-        private static string PlayerName = "Jacob";
+        private static LevelInfo currentLevelinfo;
+
+        private static string PlayerName = "Player";
 
         public static void ExitGame()
         {
@@ -66,29 +85,34 @@ namespace THClone
 
         public static void CheckIfHighscore()
         {
-            ReadXML("Content/leaderboard.xml");
+            ReadXMLLeaderboards("Content/leaderboard.xml");
             if (currentScore > leaderboard.Entry.Score)
             {
                 leaderboard.Entry.Name = PlayerName;
                 leaderboard.Entry.Score = currentScore;
-                WriteXML("Content/leaderboard.xml");
+                WriteXMLLeaderboard("Content/leaderboard.xml");
             }
         }
 
         public static Leaderboard GetHighscores()
         {
-            ReadXML("Content/leaderboard.xml");
+            ReadXMLLeaderboards("Content/leaderboard.xml");
             return leaderboard;
         }
 
-        public static void ReadXML(string filename)
+        public static LevelInfo GetLevelInfo()
+        {
+            ReadXMLLevelInfo("Content/levelinfo.xml");
+            return currentLevelinfo;
+        }
+
+        public static void ReadXMLLeaderboards(string filename)
         {
             try
             {
                 using StreamReader reader = new StreamReader(filename);
                 var lb = (Leaderboard)new XmlSerializer(typeof(Leaderboard)).Deserialize(reader.BaseStream);
                 leaderboard = lb;
-                
             }
             catch (Exception e)
             {
@@ -99,7 +123,24 @@ namespace THClone
             }
         }
 
-        public static void WriteXML(string filename)
+        public static void ReadXMLLevelInfo(string filename)
+        {
+            try
+            {
+                using StreamReader reader = new StreamReader(filename);
+                var levelinfo = (LevelInfo)new XmlSerializer(typeof(LevelInfo)).Deserialize(reader.BaseStream);
+                currentLevelinfo = levelinfo;
+            }
+            catch (Exception e)
+            {
+                // If we've caught an exception, output an error message
+                // describing the error
+                Console.WriteLine("ERROR: XML File could not be deserialized!");
+                Console.WriteLine("Exception Message: " + e.Message);
+            }
+        }
+
+        public static void WriteXMLLeaderboard(string filename)
         {
             try
             {

@@ -51,7 +51,7 @@ namespace THClone
 
         public float Rotation;
 
-        public void Initialize(Texture2D texture, Vector2 position, int frameWidth, int frameHeight, int frameCount, int frametime, Color color, float scale, bool looping)
+        public void Initialize(Texture2D texture, Vector2 position, int frameWidth, int frameHeight, int frameCount, int frametime, Color color, float scale, bool looping, float rotation = 0f)
         {
             // Keep a local copy of the values passed in
             this.color = color;
@@ -61,7 +61,7 @@ namespace THClone
             this.frameTime = frametime;
             this.scale = scale;
 
-            Rotation = 0f;
+            Rotation = rotation;
             Looping = looping;
             Position = position;
             spriteStrip = texture;

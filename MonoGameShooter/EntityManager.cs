@@ -42,7 +42,10 @@ namespace THClone
             for (int i = entities.Count - 1; i >= 0; --i)
             {
                 if (!entities[i].Active)
+                {
+
                     entities.RemoveAt(i);
+                }
             }
 
             // add entities

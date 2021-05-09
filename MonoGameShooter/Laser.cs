@@ -4,13 +4,19 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace THClone
 {
+    enum eBulletDirection
+    {
+        UP = -1,
+        DOWN = 1
+    }
+
     class Laser : ICollidable, IEntity
     {
         // laser animation.
         public Animation LaserAnimation;
 
         // the speed the laser travels
-        float laserMoveSpeed = 30f;
+        float laserMoveSpeed = 2f;
 
         // position of the laser
         public Vector2 Position => position;
@@ -21,7 +27,11 @@ namespace THClone
         // set the laser to active
         public bool Active { get; set; }
 
-        private float lifeTime;
+        //private float lifeTime;
+
+        private float rotation;
+
+        private eBulletDirection direction;
 
         // Laser beams range.
         int Range;
@@ -43,15 +53,21 @@ namespace THClone
 
         public bool FlaggedForRemoval { get; private set; }
 
+        public bool EnemyLaser { get; private set; }
+
         private Vector2 position;
 
-        public void Initialize(Animation animation, Vector2 position)
+        public void Initialize(Animation animation, Vector2 position, float rotation = 0f, eBulletDirection dir = eBulletDirection.UP, bool enemyLaser = false, float speed = 2f)
         {
-            lifeTime = 3f;
+            //lifeTime = 2f;
             LaserAnimation = animation;
             this.position = position;
             BoundingRadius = animation.FrameWidth / 2f;
             Active = true;
+            this.rotation = rotation;
+            direction = dir;
+            EnemyLaser = enemyLaser;
+            laserMoveSpeed = speed;
             //LaserAnimation.Rotation = MathHelper.ToRadians(90f);
         }
 
@@ -60,12 +76,12 @@ namespace THClone
             if (!Active)
                 return;
 
-            position.Y -= laserMoveSpeed;
+            position.Y += laserMoveSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds * (int)direction;
             LaserAnimation.Position = Position;
             LaserAnimation.Update(gameTime);
 
-            lifeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (lifeTime < 0f)
+            //lifeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (position.Y < 0f || position.Y > 1920)
             {
                 Active = false;
                 FlaggedForRemoval = true;
@@ -84,10 +100,15 @@ namespace THClone
                 return;
 
             // we don't want to hit ourselves
-            if (obj.GetType() == typeof(Player))
-                return;
+            if (obj.GetType() == typeof(Player) && EnemyLaser)
+            {
+                // add explosion
+                FlaggedForRemoval = true;
+                Active = false;
+                GameInfo.Health -= Damage;
+            }
 
-            if (obj.GetType() == typeof(Enemy))
+            if (obj.GetType() == typeof(Enemy) && !EnemyLaser)
             {
                 if ((obj as Enemy).Active)
                  {

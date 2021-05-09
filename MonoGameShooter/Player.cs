@@ -49,9 +49,6 @@ namespace THClone
 
         private Viewport viewport;
 
-        // laser
-        private List<Laser> laserBeams;
-
         private Texture2D laserTexture;
 
         //Our Laser Sound and Instance
@@ -99,7 +96,6 @@ namespace THClone
             Speed = 500;
 
             // init our laser
-            laserBeams = new List<Laser>();
             const float SECONDS_IN_MINUTE = 60f;
             const float RATE_OF_FIRE = 800f;
             laserSpawnTime = TimeSpan.FromSeconds(SECONDS_IN_MINUTE / RATE_OF_FIRE);
@@ -154,10 +150,65 @@ namespace THClone
                 previousLaserSpawnTime = gameTime.TotalGameTime;
                 // Add the laer to our list.
                 AddLaser();
-
+                //PowerupLaser();
                 // Play the laser sound!
                 laserSoundInstance.Play();
             }
+        }
+
+        private void PowerupLaser()
+        {
+            Animation laserAnimationLeft = new Animation();
+            Animation laserAnimationRight = new Animation();
+
+            // initlize the laser animation
+            laserAnimationLeft.Initialize(laserTexture,
+                Position,
+                32,
+                43,
+                1,
+                30,
+                Color.White,
+                1f,
+                true);
+
+            // initlize the laser animation
+            laserAnimationRight.Initialize(laserTexture,
+                Position,
+                32,
+                43,
+                1,
+                30,
+                Color.White,
+                1f,
+                true);
+
+            Laser laserLeft = new Laser();
+            Laser laserRight = new Laser();
+
+            // Get the starting postion of the laser.
+
+            var laserPositionLeft = Position;
+            var laserPositionRight = Position;
+
+            // Adjust the position slightly to match the muzzle of the cannon.
+            laserPositionLeft.Y += 20;
+            laserPositionLeft.X -= 40;
+
+            laserPositionRight.Y += 20;
+            laserPositionRight.X += 40;
+
+            // init the laser
+            laserLeft.Initialize(laserAnimationLeft, laserPositionLeft, -45f);
+            laserRight.Initialize(laserAnimationRight, laserPositionRight, 45f);
+
+            EntityManager.Instance.AddEntity(laserLeft);
+            EntityManager.Instance.AddEntity(laserRight);
+            CollisionManager.Instance.AddCollidable(laserRight);
+            CollisionManager.Instance.AddCollidable(laserLeft);
+
+            /* todo: add code to create a laser. */
+            // laserSoundInstance.Play();
         }
 
         protected void AddLaser()
@@ -184,7 +235,6 @@ namespace THClone
 
             // init the laser
             laser.Initialize(laserAnimation, laserPostion);
-            laserBeams.Add(laser);
 
             EntityManager.Instance.AddEntity(laser);
             CollisionManager.Instance.AddCollidable(laser);
